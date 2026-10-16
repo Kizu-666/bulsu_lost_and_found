@@ -1,0 +1,48 @@
+.trend {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.trend h2 {
+    font-size: 1.15rem;
+    margin: 0 0 0.25rem;
+}
+
+.trend-sub {
+    margin: 0 0 1rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.trend-empty {
+    margin: 0;
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--muted);
+}
+
+.trend-table {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.trend-table summary {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.trend-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+}
+
+.trend-table th,
+.trend-table td {
+    text-align: left;
+    padding: 0.45rem 0.5rem;
+    border-bottom: 1px solid rgba(43, 33, 24, 0.12);
+    font-variant-numeric: tabular-nums;
+}

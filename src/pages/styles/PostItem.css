@@ -1,0 +1,176 @@
+.post h2 {
+    font-size: 1.4rem;
+    letter-spacing: -0.01em;
+    margin: 0 2rem 0.25rem 0; /* room for the close button */
+}
+
+.post-sub {
+    margin: 0 0 1.25rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* Found / Lost switch */
+.post-kind {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    margin-bottom: 1.25rem;
+    background: var(--bg);
+    border-radius: 12px;
+}
+
+.post-kind-btn {
+    border: none;
+    border-radius: 9px;
+    padding: 0.6rem;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.post-kind-btn.is-active {
+    background: var(--text);
+    color: var(--white);
+    font-weight: 600;
+}
+
+/* Fields */
+.post-field {
+    margin-bottom: 1rem;
+}
+
+.post-field label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.post-field input,
+.post-field textarea {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    font: inherit;
+    color: var(--text);
+    background: var(--white);
+    border: 1.5px solid rgba(43, 33, 24, 0.35);
+    border-radius: 10px;
+}
+
+.post-field textarea {
+    min-height: 5rem;
+    resize: vertical;
+}
+
+.post-field input:focus,
+.post-field textarea:focus {
+    border-color: var(--text);
+}
+
+/* Error and actions */
+.post-error {
+    margin: 0 0 1rem;
+    padding: 0.7rem 0.9rem;
+    border-left: 4px solid #b3261e;
+    border-radius: 6px;
+    background: #fdeceb;
+    color: #8c1d18;
+    font-size: 0.9rem;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.post-actions .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.post-field label,
+.post-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+/* Photo preview */
+.photo-box {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border: 1.5px dashed rgba(43, 33, 24, 0.35);
+    border-radius: 12px;
+    background: var(--bg);
+}
+
+.photo-box.has-image {
+    border-style: solid;
+    border-color: rgba(43, 33, 24, 0.2);
+}
+
+.photo-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.photo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    border: none;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+}
+
+.photo-empty:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.photo-empty-title {
+    font-weight: 600;
+}
+
+.photo-empty-hint {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.photo-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.photo-link {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.required{
+    color: red;
+}

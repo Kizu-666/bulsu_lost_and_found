@@ -5,6 +5,7 @@
   --accent: #9eb1f6;
   --white: #ffffff;
   --text: #2b2118;
+  --muted: rgba(43, 33, 24, 0.68);
 
   --font-heading: 'Poppins', sans-serif;
   --font-body: 'Inter', sans-serif;
@@ -25,17 +26,31 @@ h1, h2, h3 {
   font-family: var(--font-heading);
 }
 
-.btn-primary{
-  background-color: var(--primary);
-  color: var(--white);
+.btn-primary {
+  background: var(--primary);
+  color: var(--text);
   border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
   font-family: var(--font-heading);
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s;
 }
+.btn-primary:hover { background: var(--primary-soft); }
 
-.btn-primary:hover {
-  background-color: var(--primary-soft);
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 2px solid var(--text);
+  padding: 0.55rem 1.2rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  cursor: pointer;
+}
+.btn-outline:hover { background: var(--bg); }
+
+:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
 }

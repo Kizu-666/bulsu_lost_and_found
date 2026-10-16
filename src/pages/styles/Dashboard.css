@@ -1,0 +1,91 @@
+.dash {
+    min-height: 100vh;
+}
+
+/* Page body */
+.dash-main {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem) 4rem;
+}
+
+.dash-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.dash-heading h1 {
+    font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.25rem;
+}
+
+.dash-heading p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.dash-error {
+    margin: 0 0 1.25rem;
+    padding: 0.7rem 0.9rem;
+    border-left: 4px solid #b3261e;
+    border-radius: 6px;
+    background: #fdeceb;
+    color: #8c1d18;
+}
+
+/* Totals */
+.dash-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    border-left: 6px solid var(--stat-color);
+}
+
+.stat-lost {
+    --stat-color: var(--accent);
+}
+
+.stat-found {
+    --stat-color: var(--primary);
+}
+
+.stat-claimed {
+    --stat-color: var(--text);
+}
+
+.stat-label {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.stat-number {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 2.75rem;
+    line-height: 1.1;
+    margin: 0.35rem 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 700px) {
+    .dash-stats {
+        grid-template-columns: 1fr;
+    }
+}

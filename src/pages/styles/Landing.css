@@ -1,0 +1,364 @@
+/* Hero */
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(2rem, 6vw, 4.5rem) clamp(1rem, 4vw, 3rem) clamp(3rem, 8vw, 6rem);
+}
+
+.hero h1 {
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    margin: 0 0 1.25rem;
+    max-width: 17ch;
+}
+
+.hero-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+    max-width: 44ch;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.hero-actions .hero-btn {
+    display: inline-block;
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.8rem 1.6rem;
+}
+
+.hero-link {
+    color: var(--text);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* Item tags */
+.hero-tags {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.tag {
+    position: relative;
+    width: min(300px, calc(100% - 3rem));
+    background: var(--white);
+    border-radius: 14px;
+    padding: 2.25rem 1.25rem 1.75rem;
+    box-shadow: 0 10px 24px rgba(43, 33, 24, 0.12);
+    transform: translateX(var(--x)) rotate(var(--r));
+    animation: tag-settle 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.tag+.tag {
+    margin-top: -0.75rem;
+}
+
+.tag-1 {
+    --x: -2rem;
+    --r: -4deg;
+    z-index: 1;
+}
+
+.tag-2 {
+    --x: 1.5rem;
+    --r: 3deg;
+    z-index: 2;
+    animation-delay: 0.12s;
+}
+
+.tag-3 {
+    --x: -0.5rem;
+    --r: -2deg;
+    z-index: 3;
+    animation-delay: 0.24s;
+}
+
+.tag-hole {
+    position: absolute;
+    top: 0.8rem;
+    left: 50%;
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-left: -0.45rem;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: inset 0 1px 2px rgba(43, 33, 24, 0.3);
+}
+
+.tag-status {
+    display: inline-block;
+    padding: 0.15rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.tag-status-found {
+    background: var(--primary);
+}
+
+.tag-status-lost {
+    background: var(--accent);
+}
+
+.tag-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0.6rem 0 0.75rem;
+}
+
+.tag-meta {
+    display: flex;
+    gap: 1.75rem;
+    margin: 0;
+}
+
+.tag-meta dt {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.tag-meta dd {
+    margin: 0;
+    font-weight: 500;
+}
+
+.tag-id {
+    margin: 1rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px dashed rgba(43, 33, 24, 0.3);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+@keyframes tag-settle {
+    from {
+        opacity: 0;
+        transform: translateX(var(--x)) translateY(-1.5rem) rotate(calc(var(--r) * 3));
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(var(--x)) rotate(var(--r));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tag {
+        animation: none;
+    }
+}
+
+/* How claiming works */
+.claim {
+    background: var(--white);
+    padding: clamp(3rem, 7vw, 5.5rem) clamp(1rem, 4vw, 3rem);
+}
+
+.claim-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.claim h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 2.5rem;
+}
+
+.claim-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.claim-steps li {
+    position: relative;
+    padding-top: 3.5rem;
+}
+
+.claim-steps li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 1.2rem;
+    left: 3rem;
+    right: -1.5rem;
+    height: 2px;
+    background: var(--primary-soft);
+}
+
+.claim-num {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 600;
+}
+
+.claim-steps h3 {
+    font-size: 1.1rem;
+    margin: 0 0 0.4rem;
+}
+
+.claim-steps p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 32ch;
+}
+
+/* Hand-off band */
+.handoff {
+    background: var(--primary);
+    color: var(--text);
+    padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 3rem);
+}
+
+.handoff-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.handoff h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    margin: 0 0 0.4rem;
+}
+
+.handoff p {
+    margin: 0;
+    max-width: 48ch;
+    line-height: 1.5;
+}
+
+.handoff-location {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    background: var(--white);
+    border-radius: 14px;
+    padding: 1rem 1.4rem;
+    font-style: normal;
+    min-width: min(100%, 280px);
+}
+
+.handoff-pin {
+    flex-shrink: 0;
+    color: var(--text);
+    margin-top: 0.1rem;
+}
+
+.handoff-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.handoff-details strong {
+    font-family: var(--font-heading);
+    font-weight: 600;
+}
+
+.handoff-details span {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+/* Footer */
+.footer {
+    background: var(--white);
+    padding: 1.5rem clamp(1rem, 4vw, 3rem);
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.footer-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+}
+
+.hero-tags { min-height: 22rem; } /* keeps the layout from jumping while items load */
+
+.tag-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tag-photo {
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 8px;
+}
+
+.tag-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.tag-meta dd { overflow-wrap: anywhere; }
+
+.tag-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .claim-steps {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+    }
+
+    .claim-steps li:not(:last-child)::after {
+        display: none;
+    }
+}
