@@ -315,7 +315,7 @@
     gap: 0.5rem 2rem;
 }
 
-.hero-tags { min-height: 22rem; } /* keeps the layout from jumping while items load */
+.hero-tags { min-height: 22rem; }
 
 .tag-head {
     display: flex;

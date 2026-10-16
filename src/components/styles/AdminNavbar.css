@@ -9,7 +9,7 @@
 .admin-nav-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Pushes brand to left and toggle to right on mobile */
+  justify-content: space-between;
   gap: 1.5rem;
   max-width: 1120px;
   margin: 0 auto;
@@ -76,7 +76,6 @@
     gap: 0.5rem;
   }
 
-  /* Hamburger sits on the right of the bar */
   .admin-nav-toggle {
     display: block;
     position: relative;
@@ -107,7 +106,6 @@
   .admin-nav-toggle span:nth-child(2) { top: 1.3rem; }
   .admin-nav-toggle span:nth-child(3) { top: 1.65rem; }
 
-  /* Dark overlay */
   .admin-nav-backdrop {
     display: block;
     position: fixed;
@@ -125,12 +123,11 @@
     transition-delay: 0s;
   }
 
-  /* The drawer sliding from right to left */
   .admin-nav-menu {
     position: fixed;
     top: 0;
     bottom: 0;
-    right: 0; /* Changed from left to right */
+    right: 0;
     left: auto;
     z-index: 30;
     width: min(80vw, 18rem);
@@ -141,14 +138,14 @@
     padding: 1rem;
     overflow-y: auto;
     background: var(--white);
-    box-shadow: -4px 0 24px rgba(43, 33, 24, 0.18); /* Flipped shadow direction */
-    transform: translateX(100%); /* Starts hidden off-screen to the right */
+    box-shadow: -4px 0 24px rgba(43, 33, 24, 0.18);
+    transform: translateX(100%);
     visibility: hidden;
     transition: transform 0.25s ease, visibility 0s linear 0.25s;
   }
 
   .admin-nav-menu.is-open {
-    transform: translateX(0); /* Slides into view */
+    transform: translateX(0);
     visibility: visible;
     transition-delay: 0s;
   }
@@ -184,7 +181,6 @@
     padding: 0.8rem 0.9rem;
   }
 
-  /* Pinned to the bottom of the drawer */
   .admin-nav-logout {
     margin: auto 0 0;
     padding: 0.7rem 1rem;

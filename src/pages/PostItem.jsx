@@ -32,7 +32,6 @@ function postErrorMessage(err) {
   return 'Something went wrong while saving. Check your internet connection, then try again.'
 }
 
-// Current local time in the format datetime-local expects, used as the latest allowed date
 function nowLocal() {
   const d = new Date()
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
@@ -41,7 +40,7 @@ function nowLocal() {
 
 export default function PostItem({ onDone, onResult }) {
   const { user } = useAuth()
-  const [status, setStatus] = useState('found') // 'found' or 'lost'
+  const [status, setStatus] = useState('found')
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -74,7 +73,7 @@ export default function PostItem({ onDone, onResult }) {
     setPhotoError('')
     setFile(picked)
     setPreview(URL.createObjectURL(picked))
-    e.target.value = '' // lets you pick the same file again after removing it
+    e.target.value = ''
   }
 
   const removePhoto = () => {

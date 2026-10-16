@@ -1,7 +1,7 @@
 .post h2 {
     font-size: 1.4rem;
     letter-spacing: -0.01em;
-    margin: 0 2rem 0.25rem 0; /* room for the close button */
+    margin: 0 2rem 0.25rem 0;
 }
 
 .post-sub {
@@ -10,7 +10,6 @@
     font-size: 0.9rem;
 }
 
-/* Found / Lost switch */
 .post-kind {
     display: grid;
     grid-template-columns: 1fr 1fr;

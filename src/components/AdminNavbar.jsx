@@ -17,8 +17,6 @@ export default function AdminNavbar() {
 
   const close = () => setOpen(false)
 
-  // While the drawer is open: Escape closes it, the page behind can't scroll,
-  // and keyboard focus moves into the drawer
   useEffect(() => {
     if (!open) return
     const onKey = (e) => {
@@ -33,7 +31,6 @@ export default function AdminNavbar() {
     }
   }, [open])
 
-  // If the window grows past the mobile breakpoint, close the drawer
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 701px)')
     const onChange = (e) => {

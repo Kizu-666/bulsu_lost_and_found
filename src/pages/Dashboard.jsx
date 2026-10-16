@@ -20,7 +20,7 @@ export default function Dashboard() {
 
   const handleResult = (r) => {
     setResult(r)
-    if (r.ok) setShowPost(false) // close the form on success, keep it open on failure
+    if (r.ok) setShowPost(false)
   }
 
   const count = (status) => items.filter((item) => item.status === status).length

@@ -4,12 +4,10 @@ import './styles/ResultDialog.css'
 export default function ResultDialog({ result, onPrimary, onSecondary }) {
   const primaryRef = useRef(null)
 
-  // Focus the main button when the dialog opens
   useEffect(() => {
     if (result) primaryRef.current?.focus()
   }, [result])
 
-  // Escape = the main action. Capturing it here stops the form behind from closing too.
   useEffect(() => {
     if (!result) return
     const onKey = (e) => {

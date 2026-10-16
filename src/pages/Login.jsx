@@ -41,7 +41,6 @@ export default function Login() {
       setError('This account does not have officer access.')
       logout()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isAdmin, loading, navigate])
 
   const handleSubmit = async (e) => {
