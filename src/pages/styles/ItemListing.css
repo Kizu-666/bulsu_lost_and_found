@@ -1,0 +1,205 @@
+.il { padding: 2rem 1.25rem 3rem; }
+.il-main { max-width: 1100px; margin: 0 auto; }
+.il-main h1 { margin: 0; font-size: 2rem; }
+.il-sub { margin: 0.25rem 0 1.5rem; color: var(--muted); }
+
+/* ---------- controls ---------- */
+.il-controls { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem; }
+.il-search {
+  flex: 1 1 260px; display: flex; align-items: center; gap: 0.5rem;
+  background: var(--white); border-radius: 999px; padding: 0 1rem; height: 44px;
+}
+.il-search input { flex: 1; border: none; outline: none; background: transparent; font: inherit; color: var(--text); min-width: 0; }
+.il-ico { width: 18px; height: 18px; flex: none; color: var(--primary); }
+
+.il-select, .il-dropdown summary {
+  height: 44px; border: none; border-radius: 12px; background: var(--white);
+  padding: 0 1rem; font: inherit; color: var(--text); cursor: pointer;
+}
+.il-dropdown { position: relative; }
+.il-dropdown summary { display: flex; align-items: center; list-style: none; }
+.il-dropdown summary::-webkit-details-marker { display: none; }
+.il-dropdown-panel {
+  position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; min-width: 220px;
+  background: var(--white); border-radius: 12px; padding: 0.9rem;
+  display: grid; gap: 0.6rem; box-shadow: 0 8px 24px rgba(43, 33, 24, 0.18);
+}
+.il-dropdown-panel label { display: grid; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
+.il-dropdown-panel input { font: inherit; padding: 0.4rem; border: 1px solid rgba(43, 33, 24, 0.2); border-radius: 8px; }
+.il-clear { background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer; font: inherit; }
+
+/* ---------- card + toolbar ---------- */
+.il-card { background: rgba(255, 255, 255, 0.55); border-radius: 16px; overflow: hidden; }
+.il-toolbar { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem; min-height: 68px; border-bottom: 1px solid rgba(43, 33, 24, 0.08); }
+.il-selected { background: var(--white); border-radius: 10px; padding: 0.55rem 0.9rem; font-weight: 500; }
+.il-hint { color: var(--muted); font-size: 0.9rem; }
+.il-remove {
+  display: inline-flex; align-items: center; gap: 0.45rem; border: none; cursor: pointer;
+  background: #ef3b4a; color: #fff; font: inherit; font-weight: 600;
+  padding: 0.6rem 1.1rem; border-radius: 10px;
+}
+.il-remove .il-ico { color: #fff; }
+.il-remove:hover { background: #d62d3b; }
+.il-remove:disabled, .il-claim:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Remove button sa upper-right ng toolbar */
+.il-remove-right { margin-left: auto; }
+
+/* ---------- table ---------- */
+.il-scroll { overflow-x: auto; }
+.il-table { width: 100%; border-collapse: collapse; min-width: 820px; }
+.il-table th { text-align: left; font-size: 0.85rem; font-weight: 500; color: var(--muted); padding: 0.8rem 1rem; }
+.il-table td { padding: 0.75rem 1rem; border-top: 1px solid rgba(43, 33, 24, 0.07); font-size: 0.9rem; vertical-align: middle; }
+.il-table tr.is-selected td { background: rgba(249, 113, 11, 0.07); }
+.il-col-check { width: 44px; }
+.il-table input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+.il-id { white-space: nowrap; color: var(--muted); }
+.il-name { display: flex; align-items: center; gap: 0.75rem; }
+.il-thumb { width: 46px; height: 46px; border-radius: 10px; overflow: hidden; flex: none; }
+.il-thumb .item-photo { width: 100%; height: 100%; }
+.il-date { display: block; }
+.il-time { display: block; color: var(--muted); font-size: 0.82rem; }
+
+.il-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.82rem; font-weight: 500; }
+.il-pill i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.il-pill-lost { background: #fde2e4; color: #d11a2a; }
+.il-pill-found { background: #daf5df; color: #1c8c3a; }
+.il-pill-claimed { background: #e3e8fb; color: #4457b8; }
+
+.il-view {
+  display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; cursor: pointer;
+  border: 1.5px solid var(--text); color: var(--text); font: inherit; font-weight: 500;
+  padding: 0.5rem 1.1rem; border-radius: 10px;
+}
+.il-view .il-ico { color: var(--text); }
+.il-view:hover { background: var(--bg); }
+
+.il-state { padding: 1.5rem 1rem; text-align: center; color: var(--muted); margin: 0; }
+.il-state-error { color: #d11a2a; padding: 0.5rem 0; }
+
+/* ---------- footer / pager ---------- */
+.il-footer { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.il-count { color: var(--muted); font-size: 0.9rem; }
+.il-pager { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.il-pager button {
+  min-width: 38px; height: 38px; padding: 0 0.8rem; border: none; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7); font: inherit; color: var(--text); cursor: pointer;
+}
+.il-pager button.is-active { background: var(--primary); color: #fff; font-weight: 600; }
+.il-pager button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ---------- details overlay ---------- */
+.il-modal h2 { margin: 0 0 1rem; }
+.il-modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: stretch; }
+/* photo = kasing-taas ng fields (Item ID hanggang Where Lost or Found) */
+.il-modal-photo { position: relative; border-radius: 12px; overflow: hidden; min-height: 200px; background: var(--bg); }
+.il-modal-photo .item-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
+.il-modal-fields { margin: 0; display: grid; align-content: start; gap: 0.15rem; }
+.il-modal-fields dt { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
+.il-modal-fields dt:first-child { margin-top: 0; }
+.il-modal-fields dd { margin: 0; font-weight: 500; }
+.il-modal-label { margin: 1rem 0 0.25rem; font-size: 0.85rem; font-weight: 500; color: var(--muted); }
+.il-modal-desc { margin: 0 0 1.25rem; }
+.il-claim {
+  width: 100%; border: none; cursor: pointer; padding: 0.85rem; border-radius: 12px;
+  background: var(--primary); color: #fff; font: inherit; font-weight: 600; font-size: 1rem;
+}
+.il-claim:hover:not(:disabled) { filter: brightness(0.93); }
+.il-claimed-note { margin: 0; text-align: center; color: var(--muted); }
+
+.il-confirm h2 { margin: 0 0 0.5rem; padding-right: 1.5rem; }
+.il-confirm p { margin: 0 0 1rem; color: var(--muted); }
+.il-confirm-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+
+@media (max-width: 460px) {
+  .il-modal-body { grid-template-columns: 1fr; }
+  .il-modal-photo { min-height: 0; aspect-ratio: 4 / 3; }
+}
+
+/* ---------- select-all (mobile lang) ---------- */
+.il-selectall { display: none; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer; }
+.il-selectall input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+/* ---------- responsive: table -> cards ---------- */
+@media (max-width: 760px) {
+  .il { padding: 1.25rem 1.75rem 2rem; }
+  .il-main h1 { font-size: 1.6rem; }
+  .il-search { flex-basis: 100%; }
+  .il-select { flex: 1 1 140px; }
+
+  .il-selectall { display: inline-flex; }
+  .il-toolbar { flex-wrap: wrap; }
+
+  .il-scroll { overflow: visible; }
+  .il-table { display: block; min-width: 0; }
+  .il-table thead { display: none; }
+  .il-table tbody { display: grid; gap: 1rem; padding: 0.75rem; }
+
+  /* card: [checkbox ........ ID] / photo / details / View */
+  .il-table tr {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    background: var(--white);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .il-table tr.is-selected { background: #fff1e3; }
+  .il-table tr.is-selected td { background: none; }
+  .il-table td { display: block; padding: 0; border: none; }
+
+  /* 1) detail rows (generic) — label kaliwa, value kanan */
+  .il-table td[data-label],
+  .il-name-text {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; text-align: right; padding: 0.3rem 0.9rem;
+  }
+  .il-table td[data-label] { grid-column: 1 / -1; }
+  .il-table td[data-label]::before { content: attr(data-label); }
+  .il-name-text::before { content: 'Item Name'; }
+  .il-name-text::before,
+  .il-table td[data-label]::before {
+    color: var(--muted); font-size: 0.82rem; font-weight: 500;
+    text-align: left; flex: none;
+  }
+  .il-name-text { font-weight: 600; grid-column: 1 / -1; }
+  .il-when { text-align: right; }
+  .il-date, .il-time { display: inline; }
+  .il-time { margin-left: 0.4rem; }
+
+  /* 2) specific overrides (dapat nasa baba para sila ang manalo) */
+
+  /* top strip: checkbox kaliwa, Item ID kanan — walang naka-patong */
+  .il-table td.il-col-check {
+    grid-column: 1; grid-row: 1; width: auto; padding: 0.7rem 0 0.7rem 0.9rem;
+  }
+  .il-table td.il-id {
+    grid-column: 2; grid-row: 1; display: block; padding: 0.7rem 0.9rem 0.7rem 0;
+    text-align: right; font-size: 0.82rem;
+  }
+  .il-table td.il-id::before { content: none; }
+
+  /* photo, full width */
+  .il-table td.il-cell-name, .il-name { display: contents; }
+  .il-thumb {
+    grid-column: 1 / -1; grid-row: 2;
+    width: 100%; height: auto; aspect-ratio: 16 / 10;
+    border-radius: 0; margin-bottom: 0.6rem;
+  }
+
+  /* status pill: upper-right ng photo (yung pula sa sketch) */
+  .il-table td.il-cell-status {
+    grid-column: 1 / -1; grid-row: 2;      /* kapareho ng cell ng photo */
+    justify-self: end; align-self: start;  /* upper-right */
+    margin: 0.75rem; z-index: 1;
+    display: block; padding: 0; width: auto;
+  }
+  .il-table td.il-cell-status::before { content: none; }
+  .il-cell-status .il-pill { box-shadow: 0 2px 8px rgba(43, 33, 24, 0.2); }
+
+  .il-table td.il-cell-action { grid-column: 1 / -1; padding: 0.6rem 0.9rem 0.9rem; }
+  .il-view { width: 100%; justify-content: center; }
+
+  .il-footer { flex-direction: column; align-items: stretch; text-align: center; }
+  .il-pager { justify-content: center; }
+}

@@ -1,36 +1,79 @@
+/* ===== Navbar ===== */
 .navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1120px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 1.25rem clamp(1rem, 4vw, 3rem);
+  padding: 1.5rem clamp(1rem, 5vw, 4rem);
 }
 
+/* Brand */
 .navbar-brand {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   font-family: var(--font-heading);
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--text);
   text-decoration: none;
-  font-size: 1.05rem;
 }
 
 .navbar-logo {
-  height: 3rem;
+  height: 3.25rem;
   width: auto;
 }
 
+/* Links */
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.4rem;
 }
 
 .navbar-links a {
   color: var(--text);
   text-decoration: none;
   font-weight: 500;
+}
+
+.navbar-links a:hover { color: var(--primary); }
+
+/* Divider before 2nd link */
+.navbar-links a:nth-child(2)::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 1.1rem;
+  margin-right: 1.4rem;
+  vertical-align: middle;
+  background: rgba(43, 33, 24, 0.4);
+}
+
+/* Login button */
+.navbar-links .navbar-login {
+  background: var(--primary);
+  color: #fff;
+  padding: 0.75rem 1.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(249, 113, 11, 0.35);
+}
+
+.navbar-links .navbar-login:hover {
+  background: #e05a0e;
+  color: #fff;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .navbar { flex-wrap: wrap; gap: 0.8rem; }
+  .navbar-links { flex-wrap: wrap; gap: 0.9rem; }
+  .navbar-links a:nth-child(2)::before { display: none; }
 }
