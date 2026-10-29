@@ -11,6 +11,7 @@ export default function Navbar() {
       </Link>
       <nav className="navbar-links">
         <Link to="/browse">Browse Items</Link>
+        <a href="#how-claiming-works">How It Works</a>
       </nav>
     </header>
   )
