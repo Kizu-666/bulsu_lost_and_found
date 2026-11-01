@@ -4,9 +4,9 @@ import {
 import './styles/TrendChart.css'
 
 const SERIES = [
-  { key: 'Found', color: '#f9710b' },
-  { key: 'Lost', color: '#9eb1f6' },
-  { key: 'Claimed', color: '#2b2118' },
+  { key: 'Found', color: '#f9710b', dash: undefined },
+  { key: 'Lost', color: '#9eb1f6', dash: '7 5' }, // dashed, so it differs without color
+  { key: 'Claimed', color: '#2b2118', dash: undefined },
 ]
 
 const INK = 'rgba(43, 33, 24, 0.68)'
@@ -16,8 +16,18 @@ export default function TrendChart({ data }) {
 
   return (
     <section className="trend" aria-labelledby="trend-title">
-      <h2 id="trend-title">Past six months</h2>
-      <p className="trend-sub">Items posted and claimed each month.</p>
+      <div className="trend-head">
+        <span className="trend-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+            strokeWidth="2.4" strokeLinecap="round" focusable="false">
+            <path d="M5 20V10M12 20V4M19 20v-7" />
+          </svg>
+        </span>
+        <div>
+          <h2 id="trend-title">Past six months</h2>
+          <p className="trend-sub">Items posted and claimed each month.</p>
+        </div>
+      </div>
 
       {!hasData ? (
         <p className="trend-empty">No activity yet. Post an item to start the chart.</p>
@@ -35,7 +45,14 @@ export default function TrendChart({ data }) {
                 allowDecimals={false} tickLine={false} axisLine={false}
                 tick={{ fill: INK, fontSize: 13 }}
               />
-              <Tooltip />
+              <Tooltip
+                cursor={{ stroke: 'rgba(43, 33, 24, 0.25)' }}
+                contentStyle={{
+                  border: 'none', borderRadius: 14,
+                  boxShadow: '0 8px 24px rgba(43, 33, 24, 0.18)', padding: '0.5rem 0.75rem',
+                }}
+                labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+              />
               <Legend
                 iconType="circle"
                 formatter={(value) => <span style={{ color: 'var(--text)' }}>{value}</span>}
@@ -43,9 +60,9 @@ export default function TrendChart({ data }) {
               {SERIES.map((s) => (
                 <Line
                   key={s.key} type="linear" dataKey={s.key}
-                  stroke={s.color} strokeWidth={2.5}
-                  dot={{ r: 4, fill: s.color, stroke: '#ffffff', strokeWidth: 2 }}
-                  activeDot={{ r: 6, stroke: '#ffffff', strokeWidth: 2 }}
+                  stroke={s.color} strokeWidth={3} strokeDasharray={s.dash}
+                  dot={{ r: 4.5, fill: s.color, stroke: '#ffffff', strokeWidth: 2 }}
+                  activeDot={{ r: 7, fill: s.color, stroke: '#2b2118', strokeWidth: 2 }}
                 />
               ))}
             </LineChart>

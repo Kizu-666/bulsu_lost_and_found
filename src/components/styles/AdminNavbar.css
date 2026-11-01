@@ -1,9 +1,12 @@
 .admin-nav {
   position: sticky;
-  top: 0;
+  top: 0.75rem;
   z-index: 10;
+  max-width: 1120px;
+  margin: 0.75rem auto 0;
   background: var(--white);
-  box-shadow: 0 1px 0 rgba(43, 33, 24, 0.08);
+  border-radius: 22px;
+  box-shadow: 0 8px 24px rgba(43, 33, 24, 0.1);
 }
 
 .admin-nav-inner {
@@ -11,9 +14,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0.6rem clamp(1rem, 4vw, 3rem);
+  padding: 0.55rem 1.1rem;
 }
 
 .admin-nav-brand {
@@ -32,7 +33,7 @@
   width: auto;
 }
 
-/* Desktop: links and logout sit on the right of the bar */
+/* Desktop: links and avatar sit on the right of the bar */
 .admin-nav-menu {
   display: flex;
   align-items: center;
@@ -41,8 +42,11 @@
 }
 
 .admin-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   padding: 0.5rem 0.9rem;
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text);
   font-weight: 500;
   text-decoration: none;
@@ -53,14 +57,37 @@
   background: var(--bg);
 }
 
+/* Icon shows on every link, so the active one is not told apart by color alone */
 .admin-nav-link.is-active {
-  background: var(--text);
-  color: var(--white);
+  background: var(--primary);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.admin-nav-divider {
+  width: 1px;
+  height: 1.75rem;
+  margin: 0 0.75rem;
+  background: rgba(43, 33, 24, 0.25);
 }
 
 .admin-nav-logout {
-  margin-left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
   padding: 0.45rem 1rem;
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-nav-logout:hover {
+  background: var(--bg);
 }
 
 /* Mobile-only pieces are hidden on desktop */
@@ -72,6 +99,10 @@
 
 /* Small screens: slide-in drawer from the right */
 @media (max-width: 700px) {
+  .admin-nav {
+    margin: 0.5rem 0.5rem 0;
+  }
+
   .admin-nav-inner {
     gap: 0.5rem;
   }
@@ -181,9 +212,13 @@
     padding: 0.8rem 0.9rem;
   }
 
+  .admin-nav-divider {
+    display: none;
+  }
+
   .admin-nav-logout {
+    justify-content: center;
     margin: auto 0 0;
-    padding: 0.7rem 1rem;
   }
 }
 

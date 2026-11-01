@@ -57,14 +57,14 @@ export default function Login() {
   }
 
   return (
-    <main className="login">
+    <main className="login" id="main">
       <section className="login-panel">
         <form className="login-form" onSubmit={handleSubmit}>
           <h1>Sign in</h1>
           <p className="login-sub">For CICT LSC officers only.</p>
 
           <div className="login-field">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email <span className="login-req">(required)</span></label>
             <div className="login-input">
               <span
                 className="login-input-icon"
@@ -73,6 +73,8 @@ export default function Login() {
               />
               <input
                 id="email" type="email" autoComplete="email"
+                aria-invalid={error ? 'true' : undefined}
+                aria-describedby={error ? 'login-error' : undefined}
                 value={email} onChange={(e) => setEmail(e.target.value)} required
                 placeholder="cict@example.com"
               />
@@ -80,7 +82,7 @@ export default function Login() {
           </div>
 
           <div className="login-field">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password <span className="login-req">(required)</span></label>
             <div className="login-input">
               <span
                 className="login-input-icon"
@@ -90,6 +92,8 @@ export default function Login() {
               <input
                 id="password" type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
+                aria-invalid={error ? 'true' : undefined}
+                aria-describedby={error ? 'login-error' : undefined}
                 value={password} onChange={(e) => setPassword(e.target.value)} required
                 placeholder="********"
               />
@@ -108,10 +112,18 @@ export default function Login() {
             </div>
           </div>
 
-          {error && <p className="login-error" role="alert">{error}</p>}
+          {error && (
+            <p className="login-error" id="login-error" role="alert">
+              <svg className="login-error-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                <path d="M12 3 2 21h20L12 3Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M12 10v5M12 17.8v.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <span>{error}</span>
+            </p>
+          )}
 
           <button className="btn-primary login-submit" type="submit" disabled={submitting}>
-            {submitting ? 'Signing in…' : 'Sign in'}
+            {submitting ? 'Signing in…' : (<>Sign in <span aria-hidden="true">→</span></>)}
           </button>
 
           <p className="login-back"><Link to="/">Back to home</Link></p>
@@ -120,8 +132,10 @@ export default function Login() {
 
       <aside className="login-aside">
         <Link to="/" className="login-brand">
-          <img src={logo} alt="" className="login-logo" />
-          <span>CICT Lost &amp; Found</span>
+          <span className="login-logo-badge">
+            <img src={logo} alt="" className="login-logo" />
+          </span>
+          <span className="login-brand-name">CICT Lost &amp; Found</span>
         </Link>
 
         <div className="login-aside-body">
@@ -131,7 +145,13 @@ export default function Login() {
           </p>
         </div>
 
-        <p className="login-aside-foot">Bulacan State University, Main Campus</p>
+        <p className="login-aside-foot">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+            <circle cx="12" cy="9.5" r="2.5" fill="currentColor" />
+          </svg>
+          Bulacan State University, Main Campus
+        </p>
       </aside>
     </main>
   )

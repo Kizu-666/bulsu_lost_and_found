@@ -1,5 +1,13 @@
+/* Palette: --primary #f9710b | --primary-soft #f1ae70 | --bg #fce6c1 | --accent #9eb1f6 | --white #fff */
 .profile {
-  min-height: 100vh;
+  --pf-top: 5.5rem; /* page background also fills behind the floating navbar */
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: calc(100vh + var(--pf-top));
+  margin-top: calc(-1 * var(--pf-top));
+  padding-top: var(--pf-top);
+  background: linear-gradient(180deg, #fff6ea 0%, #fde9cf 100%);
 }
 
 .profile-main {
@@ -9,26 +17,39 @@
 }
 
 .profile-main h1 {
-  font-size: clamp(1.6rem, 3.5vw, 2.25rem);
-  letter-spacing: -0.01em;
-  margin: 0 0 0.25rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem;
 }
 
 .profile-sub {
+  position: relative;
   margin: 0 0 1.75rem;
+  padding-bottom: 0.8rem;
   color: var(--muted);
+}
+
+.profile-sub::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 3.5rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--primary);
 }
 
 /* ---------- card ---------- */
 .profile-card {
   display: grid;
-  grid-template-columns: minmax(220px, 300px) 1fr;
-  gap: 2.5rem;
-  align-items: center;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 2rem;
+  align-items: stretch;
   background: var(--white);
-  border-radius: 20px;
-  padding: clamp(1.5rem, 4vw, 3rem);
-  box-shadow: 0 6px 24px rgba(43, 33, 24, 0.08);
+  border-radius: 24px;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  box-shadow: 0 8px 24px rgba(249, 113, 11, 0.12);
 }
 
 /* ---------- avatar side ---------- */
@@ -36,9 +57,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  padding-right: 2.5rem;
-  border-right: 1px solid rgba(43, 33, 24, 0.1);
+  padding: 1rem 1.5rem;
 }
 
 .profile-avatar-wrap {
@@ -54,6 +75,8 @@
   border-radius: 50%;
   overflow: hidden;
   background: #e9e6e3;
+  border: 4px solid var(--white);
+  box-shadow: 0 0 0 3px var(--primary), 0 8px 20px rgba(43, 33, 24, 0.15);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -74,7 +97,7 @@
 
 .profile-camera {
   position: absolute;
-  right: 0;
+  right: -2px;
   bottom: 4px;
   width: 44px;
   height: 44px;
@@ -84,11 +107,13 @@
   display: grid;
   place-items: center;
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(249, 113, 11, 0.4);
 }
 
 .profile-camera:hover:not(:disabled) { background: var(--primary-soft); }
+.profile-camera:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
 .profile-camera:disabled { opacity: 0.6; cursor: progress; }
-.profile-camera svg { width: 20px; height: 20px; fill: var(--white); }
+.profile-camera svg { width: 20px; height: 20px; fill: var(--text); }
 
 .profile-name {
   margin: 0;
@@ -96,8 +121,15 @@
 }
 
 .profile-role {
-  margin: 0.15rem 0 0;
-  color: var(--muted);
+  display: inline-block;
+  margin: 0.5rem 0 0;
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  background: var(--white);
+  border: 1.5px solid var(--text);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .profile-note {
@@ -109,7 +141,9 @@
 /* ---------- details side ---------- */
 .profile-details {
   display: grid;
+  align-content: center;
   gap: 1.25rem;
+  padding: 0.5rem 0.5rem 0.5rem 0;
 }
 
 .profile-row {
@@ -118,9 +152,11 @@
   gap: 1rem;
   width: 100%;
   padding: 1.1rem 1.25rem;
-  border: 1px solid rgba(43, 33, 24, 0.1);
-  border-radius: 14px;
-  background: rgba(252, 230, 193, 0.18);
+  border: none;
+  border-left: 5px solid var(--primary);
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow: 0 6px 18px rgba(43, 33, 24, 0.1);
   font: inherit;
   color: var(--text);
   text-align: left;
@@ -128,18 +164,26 @@
 
 .profile-row-action {
   cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.15s;
 }
 
 .profile-row-action:hover {
-  background: rgba(252, 230, 193, 0.45);
+  background: #fffaf3;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(249, 113, 11, 0.2);
+}
+
+.profile-row-action:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 3px;
 }
 
 .profile-row-icon {
   flex: none;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: rgba(249, 113, 11, 0.15);
+  background: rgba(252, 230, 193, 0.8);
   display: grid;
   place-items: center;
 }
@@ -147,7 +191,7 @@
 .profile-row-icon svg {
   width: 24px;
   height: 24px;
-  fill: var(--primary);
+  fill: #c2410c;
 }
 
 .profile-row-text {
@@ -165,7 +209,7 @@
 
 .profile-row-value {
   font-size: 1.2rem;
-  font-weight: 500;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
@@ -223,15 +267,17 @@
   width: 100%;
   font: inherit;
   padding: 0.65rem 0.8rem;
-  border: 1px solid rgba(43, 33, 24, 0.25);
-  border-radius: 10px;
+  border: 1.5px solid rgba(43, 33, 24, 0.45);
+  border-radius: 12px;
+  min-height: 48px;
   background: var(--white);
   color: var(--text);
 }
 
 .profile-pw input:focus-visible {
-  outline: 3px solid var(--primary);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--text);
+  box-shadow: 0 0 0 4px var(--accent);
 }
 
 .profile-pw-group {
@@ -244,7 +290,7 @@
 }
 
 .profile-pw-field input {
-  padding-right: 2.9rem;
+  padding-right: 3.2rem;
 }
 
 .profile-pw-eye {
@@ -252,8 +298,8 @@
   top: 50%;
   right: 0.4rem;
   transform: translateY(-50%);
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   border: none;
@@ -263,7 +309,12 @@
 }
 
 .profile-pw-eye:hover {
-  background: rgba(43, 33, 24, 0.08);
+  background: var(--bg);
+}
+
+.profile-pw-eye:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 0;
 }
 
 .profile-pw-eye svg {
@@ -289,16 +340,23 @@
 }
 
 /* ---------- mobile ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .profile-row-action {
+    transition: none;
+  }
+}
+
 @media (max-width: 760px) {
   .profile-card {
     grid-template-columns: 1fr;
     gap: 1.75rem;
   }
 
-  .profile-who {
-    padding-right: 0;
-    padding-bottom: 1.75rem;
-    border-right: none;
-    border-bottom: 1px solid rgba(43, 33, 24, 0.1);
+  .profile {
+    --pf-top: 5rem;
+  }
+
+  .profile-details {
+    padding: 0;
   }
 }

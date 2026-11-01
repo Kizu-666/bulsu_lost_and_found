@@ -1,91 +1,131 @@
-.il { padding: 2rem 1.25rem 3rem; }
-.il-main { max-width: 1100px; margin: 0 auto; }
-.il-main h1 { margin: 0; font-size: 2rem; }
-.il-sub { margin: 0.25rem 0 1.5rem; color: var(--muted); }
+/* Palette: --primary #f9710b | --primary-soft #f1ae70 | --bg #fce6c1 | --accent #9eb1f6 | --white #fff */
+.il {
+  --il-top: 5.5rem; /* page background also fills behind the floating navbar */
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: calc(100vh + var(--il-top));
+  margin-top: calc(-1 * var(--il-top));
+  padding: calc(var(--il-top) + 1.5rem) 1.25rem 3rem;
+  background: linear-gradient(180deg, #fff6ea 0%, #fde9cf 100%);
+}
+
+.il-main { max-width: 1120px; margin: 0 auto; }
+.il-main h1 { margin: 0 0 0.35rem; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; }
+.il-sub { position: relative; margin: 0 0 1.5rem; padding-bottom: 0.8rem; color: var(--muted); }
+.il-sub::after { content: ''; position: absolute; left: 0; bottom: 0; width: 3.5rem; height: 3px; border-radius: 2px; background: var(--primary); }
 
 /* ---------- controls ---------- */
 .il-controls { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem; }
 .il-search {
-  flex: 1 1 260px; display: flex; align-items: center; gap: 0.5rem;
-  background: var(--white); border-radius: 999px; padding: 0 1rem; height: 44px;
+  flex: 1 1 260px; display: flex; align-items: center; gap: 0.6rem;
+  background: var(--white); border-radius: 999px; padding: 0 1.1rem; min-height: 48px;
+  box-shadow: 0 6px 18px rgba(249, 113, 11, 0.1);
 }
+.il-search:focus-within { outline: 3px solid var(--text); outline-offset: 2px; }
 .il-search input { flex: 1; border: none; outline: none; background: transparent; font: inherit; color: var(--text); min-width: 0; }
-.il-ico { width: 18px; height: 18px; flex: none; color: var(--primary); }
+.il-search input::placeholder { color: rgba(43, 33, 24, 0.62); }
+.il-ico { width: 18px; height: 18px; flex: none; color: var(--text); }
+.il-search .il-ico { color: var(--primary); }
 
 .il-select, .il-dropdown summary {
-  height: 44px; border: none; border-radius: 12px; background: var(--white);
-  padding: 0 1rem; font: inherit; color: var(--text); cursor: pointer;
+  min-height: 48px; border: none; border-radius: 14px; background: var(--white);
+  padding: 0 1.1rem; font: inherit; font-weight: 500; color: var(--text); cursor: pointer;
+  box-shadow: 0 6px 18px rgba(249, 113, 11, 0.1);
 }
+.il-select:hover, .il-dropdown summary:hover { background: #fffaf3; }
+.il-select:focus-visible, .il-dropdown summary:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
 .il-dropdown { position: relative; }
-.il-dropdown summary { display: flex; align-items: center; list-style: none; }
+.il-dropdown summary { display: flex; align-items: center; gap: 0.5rem; list-style: none; }
 .il-dropdown summary::-webkit-details-marker { display: none; }
+.il-dropdown summary::after {
+  content: ''; border-style: solid; border-width: 5px 4px 0; border-color: currentColor transparent transparent;
+}
+.il-dropdown[open] summary { background: var(--accent); }
 .il-dropdown-panel {
-  position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; min-width: 220px;
-  background: var(--white); border-radius: 12px; padding: 0.9rem;
-  display: grid; gap: 0.6rem; box-shadow: 0 8px 24px rgba(43, 33, 24, 0.18);
+  position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; min-width: 230px;
+  background: var(--white); border-radius: 16px; padding: 1rem;
+  display: grid; gap: 0.7rem; box-shadow: 0 12px 30px rgba(43, 33, 24, 0.2);
 }
 .il-dropdown-panel label { display: grid; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
-.il-dropdown-panel input { font: inherit; padding: 0.4rem; border: 1px solid rgba(43, 33, 24, 0.2); border-radius: 8px; }
-.il-clear { background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer; font: inherit; }
+.il-dropdown-panel input { font: inherit; padding: 0.55rem; border: 1.5px solid rgba(43, 33, 24, 0.35); border-radius: 10px; color: var(--text); }
+.il-clear {
+  min-height: 44px; padding: 0 0.9rem; background: none; border: 2px solid var(--primary); border-radius: 12px;
+  color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
+}
+.il-clear:hover { background: var(--bg); }
 
 /* ---------- card + toolbar ---------- */
-.il-card { background: rgba(255, 255, 255, 0.55); border-radius: 16px; overflow: hidden; }
-.il-toolbar { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem; min-height: 68px; border-bottom: 1px solid rgba(43, 33, 24, 0.08); }
-.il-selected { background: var(--white); border-radius: 10px; padding: 0.55rem 0.9rem; font-weight: 500; }
+.il-card { background: var(--white); border-radius: 22px; overflow: hidden; box-shadow: 0 8px 24px rgba(249, 113, 11, 0.12); }
+.il-toolbar { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1.25rem; min-height: 68px; border-bottom: 1px solid rgba(43, 33, 24, 0.1); }
+.il-selected { background: var(--bg); border-radius: 10px; padding: 0.55rem 0.9rem; font-weight: 600; }
 .il-hint { color: var(--muted); font-size: 0.9rem; }
 .il-remove {
-  display: inline-flex; align-items: center; gap: 0.45rem; border: none; cursor: pointer;
-  background: #ef3b4a; color: #fff; font: inherit; font-weight: 600;
-  padding: 0.6rem 1.1rem; border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 0.45rem; border: none; cursor: pointer; min-height: 44px;
+  background: #c62828; color: #fff; font: inherit; font-weight: 600;
+  padding: 0.6rem 1.1rem; border-radius: 12px;
 }
 .il-remove .il-ico { color: #fff; }
-.il-remove:hover { background: #d62d3b; }
+.il-remove:hover { background: #a81f1f; }
+.il-remove:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
 .il-remove:disabled, .il-claim:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* Remove button sa upper-right ng toolbar */
+/* Remove button on the upper right of the toolbar */
 .il-remove-right { margin-left: auto; }
 
 /* ---------- table ---------- */
 .il-scroll { overflow-x: auto; }
 .il-table { width: 100%; border-collapse: collapse; min-width: 820px; }
-.il-table th { text-align: left; font-size: 0.85rem; font-weight: 500; color: var(--muted); padding: 0.8rem 1rem; }
-.il-table td { padding: 0.75rem 1rem; border-top: 1px solid rgba(43, 33, 24, 0.07); font-size: 0.9rem; vertical-align: middle; }
-.il-table tr.is-selected td { background: rgba(249, 113, 11, 0.07); }
-.il-col-check { width: 44px; }
-.il-table input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
-.il-id { white-space: nowrap; color: var(--muted); }
+.il-table th {
+  text-align: left; font-size: 0.85rem; font-weight: 600; color: var(--text);
+  padding: 0.85rem 1rem; background: #fff3e2; white-space: nowrap;
+}
+.il-table td { padding: 0.8rem 1rem; border-top: 1px solid rgba(43, 33, 24, 0.08); font-size: 0.95rem; vertical-align: middle; }
+.il-table tbody tr:hover td { background: #fffaf3; }
+.il-table tr.is-selected td { background: rgba(249, 113, 11, 0.09); }
+.il-table tr.is-selected td:first-child { box-shadow: inset 4px 0 0 var(--primary); }
+.il-col-check { width: 48px; }
+.il-table input[type='checkbox'] { width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; }
+.il-table input[type='checkbox']:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.il-id { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
 .il-name { display: flex; align-items: center; gap: 0.75rem; }
-.il-thumb { width: 46px; height: 46px; border-radius: 10px; overflow: hidden; flex: none; }
+.il-name-text { font-weight: 600; }
+.il-thumb { width: 48px; height: 48px; border-radius: 12px; overflow: hidden; flex: none; border: 1.5px solid rgba(43, 33, 24, 0.15); }
 .il-thumb .item-photo { width: 100%; height: 100%; }
-.il-date { display: block; }
+.il-date { display: block; font-weight: 500; }
 .il-time { display: block; color: var(--muted); font-size: 0.82rem; }
 
-.il-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.82rem; font-weight: 500; }
-.il-pill i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.il-pill-lost { background: #fde2e4; color: #d11a2a; }
-.il-pill-found { background: #daf5df; color: #1c8c3a; }
-.il-pill-claimed { background: #e3e8fb; color: #4457b8; }
+/* Status: dot + word, so it never relies on color alone */
+.il-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+.il-pill i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.il-pill-lost { background: #fde2e4; color: #a4121f; }
+.il-pill-found { background: #daf5df; color: #14702d; }
+.il-pill-claimed { background: #e3e8fb; color: #33449f; }
 
 .il-view {
-  display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; cursor: pointer;
-  border: 1.5px solid var(--text); color: var(--text); font: inherit; font-weight: 500;
-  padding: 0.5rem 1.1rem; border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 0.45rem; background: var(--white); cursor: pointer; min-height: 44px;
+  border: 2px solid var(--primary); color: var(--text); font: inherit; font-weight: 600;
+  padding: 0.45rem 1.1rem; border-radius: 12px;
 }
 .il-view .il-ico { color: var(--text); }
 .il-view:hover { background: var(--bg); }
+.il-view:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
 
-.il-state { padding: 1.5rem 1rem; text-align: center; color: var(--muted); margin: 0; }
-.il-state-error { color: #d11a2a; padding: 0.5rem 0; }
+.il-state { padding: 1.75rem 1rem; text-align: center; color: var(--muted); margin: 0; }
+.il-state-error { color: #a4121f; padding: 0.5rem 0; }
 
 /* ---------- footer / pager ---------- */
 .il-footer { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: space-between; align-items: center; margin-top: 1rem; }
 .il-count { color: var(--muted); font-size: 0.9rem; }
 .il-pager { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .il-pager button {
-  min-width: 38px; height: 38px; padding: 0 0.8rem; border: none; border-radius: 10px;
-  background: rgba(255, 255, 255, 0.7); font: inherit; color: var(--text); cursor: pointer;
+  min-width: 44px; height: 44px; padding: 0 0.8rem; border: none; border-radius: 12px;
+  background: var(--white); font: inherit; font-weight: 500; color: var(--text); cursor: pointer;
+  box-shadow: 0 4px 12px rgba(249, 113, 11, 0.1);
 }
-.il-pager button.is-active { background: var(--primary); color: #fff; font-weight: 600; }
+.il-pager button:hover:not(:disabled) { background: var(--bg); }
+.il-pager button:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.il-pager button.is-active { background: var(--primary); color: var(--text); font-weight: 700; }
 .il-pager button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ---------- details overlay ---------- */
@@ -102,8 +142,9 @@
 .il-modal-desc { margin: 0 0 1.25rem; }
 .il-claim {
   width: 100%; border: none; cursor: pointer; padding: 0.85rem; border-radius: 12px;
-  background: var(--primary); color: #fff; font: inherit; font-weight: 600; font-size: 1rem;
+  background: var(--primary); color: var(--text); font: inherit; font-weight: 700; font-size: 1rem;
 }
+.il-claim:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
 .il-claim:hover:not(:disabled) { filter: brightness(0.93); }
 .il-claimed-note { margin: 0; text-align: center; color: var(--muted); }
 
@@ -122,7 +163,7 @@
 
 /* ---------- responsive: table -> cards ---------- */
 @media (max-width: 760px) {
-  .il { padding: 1.25rem 1.75rem 2rem; }
+  .il { padding: calc(var(--il-top) + 1rem) 1.25rem 2rem; }
   .il-main h1 { font-size: 1.6rem; }
   .il-search { flex-basis: 100%; }
   .il-select { flex: 1 1 140px; }
@@ -145,6 +186,7 @@
     overflow: hidden;
   }
   .il-table tr.is-selected { background: #fff1e3; }
+  .il-table tbody tr:hover td { background: none; }
   .il-table tr.is-selected td { background: none; }
   .il-table td { display: block; padding: 0; border: none; }
 
