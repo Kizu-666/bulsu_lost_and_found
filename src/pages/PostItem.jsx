@@ -3,9 +3,10 @@ import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { uploadImage, validateImage } from '../utils/uploadImage'
+import { LOCATIONS } from '../constants/locations'
 import './styles/PostItem.css'
 
-const emptyForm = { name: '', description: '', date: '', place: '' }
+const emptyForm = { name: '', description: '', date: '', place: '', customPlace: '' }
 
 function makeItemId() {
   const year = new Date().getFullYear()
@@ -83,6 +84,8 @@ export default function PostItem({ onDone, onResult }) {
   }
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+  const handlePlaceChange = (e) =>
+    setForm({ ...form, place: e.target.value, customPlace: '' })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -90,6 +93,11 @@ export default function PostItem({ onDone, onResult }) {
 
     if (isFound && !file) {
       setError('Add a photo of the found item.')
+      return
+    }
+
+    if (form.place === 'Others' && !form.customPlace.trim()) {
+      setError('Enter the specific location.')
       return
     }
 
@@ -119,7 +127,8 @@ export default function PostItem({ onDone, onResult }) {
           description: form.description.trim(),
           status,
           date: form.date,
-          place: form.place.trim(),
+          place: form.place === 'Others' ? form.customPlace.trim() : form.place,
+          placeCategory: form.place,
           imageUrl,
           postedBy: user.uid,
           createdAt: serverTimestamp(),
@@ -191,11 +200,24 @@ export default function PostItem({ onDone, onResult }) {
 
       <div className="post-field">
         <label htmlFor="item-place">{isFound ? 'Where found' : 'Where lost'} <span className='required'>*</span></label>
-        <input
-          id="item-place" name="place" maxLength={80}
-          value={form.place} onChange={handleChange} required
-          placeholder="e.g. Room 301"
-        />
+        <select id="item-place" name="place" value={form.place} onChange={handlePlaceChange} required>
+          <option value="" disabled>Select location</option>
+          {LOCATIONS.map((location) => (
+            <option key={location} value={location}>{location}</option>
+          ))}
+        </select>
+        {form.place === 'Others' && (
+          <input
+            className="post-custom-place"
+            name="customPlace"
+            maxLength={80}
+            value={form.customPlace}
+            onChange={handleChange}
+            aria-label="Specific location"
+            placeholder="Enter specific location"
+            required
+          />
+        )}
       </div>
 
       <div className="post-field">

@@ -50,7 +50,8 @@
 }
 
 .post-field input,
-.post-field textarea {
+.post-field textarea,
+.post-field select {
     width: 100%;
     padding: 0.7rem 0.9rem;
     font: inherit;
@@ -65,8 +66,17 @@
     resize: vertical;
 }
 
+.post-field select {
+    min-height: 2.75rem;
+}
+
+.post-field .post-custom-place {
+    margin-top: 0.4rem;
+}
+
 .post-field input:focus,
-.post-field textarea:focus {
+.post-field textarea:focus,
+.post-field select:focus {
     border-color: var(--text);
 }
 

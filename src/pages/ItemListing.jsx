@@ -1,19 +1,23 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ref, update, serverTimestamp } from 'firebase/database'
 import { db } from '../firebase'
 import useItems from '../hooks/useItems'
 import ItemPhoto from '../components/ItemPhoto'
 import Modal from '../components/Modal'
+import ResultDialog from '../components/ResultDialog'
+import PostItem from './PostItem'
+import { LOCATIONS } from '../constants/locations'
 import './styles/ItemListing.css'
 
 const FILTERS = [
-  { value: 'all', label: 'All' },
+  { value: 'all', label: 'All Status' },
   { value: 'lost', label: 'Lost' },
   { value: 'found', label: 'Found' },
   { value: 'claimed', label: 'Claimed' },
 ]
 
 const PAGE_SIZE = 6 // pager shows only when items exceed this
+const EMPTY_CLAIM = { studentId: '', studentName: '', contactNumber: '' }
 
 const plural = (n) => (n > 1 ? 's' : '')
 
@@ -52,6 +56,12 @@ const EyeIcon = () => (
   </svg>
 )
 
+const PlusIcon = () => (
+  <svg viewBox="0 0 24 24" className="il-ico" aria-hidden="true">
+    <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+  </svg>
+)
+
 /* ---------- Small components ---------- */
 function StatusPill({ status }) {
   const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : '—'
@@ -65,6 +75,23 @@ function StatusPill({ status }) {
 function ErrorText({ message }) {
   if (!message) return null
   return <p className="il-state il-state-error" role="alert">{message}</p>
+}
+
+/* Feedback message after an action (auto-hides) */
+function Toast({ notice, onClose }) {
+  useEffect(() => {
+    if (!notice) return undefined
+    const t = setTimeout(onClose, 4000)
+    return () => clearTimeout(t)
+  }, [notice, onClose])
+
+  if (!notice) return null
+  return (
+    <div className="il-toast" role="status" aria-live="polite">
+      <span>{notice}</span>
+      <button type="button" onClick={onClose} aria-label="Dismiss message">×</button>
+    </div>
+  )
 }
 
 export default function ItemListing() {
@@ -82,12 +109,18 @@ export default function ItemListing() {
   const [confirmRemove, setConfirmRemove] = useState(false)
   const [busy, setBusy] = useState(false)
   const [actionError, setActionError] = useState('')
+  const [notice, setNotice] = useState('') // success feedback
+  const [claiming, setClaiming] = useState(false) // claim form open?
+  const [claim, setClaim] = useState(EMPTY_CLAIM)
 
-  /* Unique locations for the dropdown */
-  const places = useMemo(
-    () => [...new Set(items.map((i) => i.place).filter(Boolean))].sort(),
-    [items]
-  )
+  /* Add Item = same as "Post an Item" on the Dashboard */
+  const [showPost, setShowPost] = useState(false)
+  const [result, setResult] = useState(null)
+
+  const handleResult = (r) => {
+    setResult(r)
+    if (r.ok) setShowPost(false)
+  }
 
   /* Search + filters, newest first */
   const filtered = useMemo(() => {
@@ -98,7 +131,7 @@ export default function ItemListing() {
     return items
       .filter((item) => {
         if (status !== 'all' && item.status !== status) return false
-        if (place !== 'all' && item.place !== place) return false
+        if (place !== 'all' && (item.placeCategory || item.place) !== place) return false
         if (fromT || toT) {
           const t = new Date(item.date).getTime()
           if (Number.isNaN(t)) return false
@@ -163,11 +196,12 @@ export default function ItemListing() {
   const hasFilters = query || status !== 'all' || place !== 'all' || from || to
 
   /* ---------- Actions ---------- */
-  const runAction = async (task, permissionMsg, failMsg) => {
+  const runAction = async (task, permissionMsg, failMsg, successMsg) => {
     setBusy(true)
     setActionError('')
     try {
       await task()
+      if (successMsg) setNotice(successMsg)
     } catch (err) {
       console.error(err)
       setActionError(err?.code === 'PERMISSION_DENIED' ? permissionMsg : failMsg)
@@ -175,8 +209,9 @@ export default function ItemListing() {
     setBusy(false)
   }
 
-  const handleRemove = () =>
-    runAction(
+  const handleRemove = () => {
+    const count = selected.length
+    return runAction(
       async () => {
         const updates = {}
         selected.forEach((key) => { updates[`items/${key}`] = null }) // null = delete
@@ -185,25 +220,77 @@ export default function ItemListing() {
         setConfirmRemove(false)
       },
       'Your account does not have permission to remove items.',
-      'Could not remove the items. Try again.'
+      'Could not remove the items. Try again.',
+      `${count} item${plural(count)} removed successfully.`
     )
+  }
 
-  const handleClaim = () => {
+  /* LOST item -> someone found it: status becomes "found" */
+  const handleFound = () => {
     if (!viewing) return
+    return runAction(
+      async () => {
+        await update(ref(db, `items/${viewing.key}`), {
+          status: 'found',
+          foundAt: serverTimestamp(),
+        })
+        setViewing(null)
+      },
+      'Your account does not have permission to update items.',
+      'Could not update the item. Try again.',
+      'Item marked as found.'
+    )
+  }
+
+  /* FOUND item -> owner claims it (with claiming form) */
+  const onClaimField = (e) => setClaim((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+
+  const handleClaim = (e) => {
+    e.preventDefault()
+    if (!viewing) return
+    const studentId = claim.studentId.trim()
+    const studentName = claim.studentName.trim()
+    const contactNumber = claim.contactNumber.trim()
+
+    if (!studentId || !studentName || !contactNumber) {
+      setActionError('Please fill in all the fields.')
+      return
+    }
+    if (!/^[0-9+\-\s()]{7,15}$/.test(contactNumber)) {
+      setActionError('Please enter a valid contact number.')
+      return
+    }
+
     return runAction(
       async () => {
         await update(ref(db, `items/${viewing.key}`), {
           status: 'claimed',
           claimedAt: serverTimestamp(),
+          claimedBy: { studentId, studentName, contactNumber },
         })
         setViewing(null)
+        setClaiming(false)
+        setClaim(EMPTY_CLAIM)
       },
       'Your account does not have permission to claim items.',
-      'Could not update the item. Try again.'
+      'Could not update the item. Try again.',
+      'Item claimed successfully.'
     )
   }
 
-  const closeView = () => { setViewing(null); setActionError('') }
+  const openView = (item) => {
+    setClaiming(false)
+    setClaim(EMPTY_CLAIM)
+    setActionError('')
+    setViewing(item)
+  }
+
+  const closeView = () => {
+    setViewing(null)
+    setActionError('')
+    setClaiming(false)
+    setClaim(EMPTY_CLAIM)
+  }
 
   // Keeps the overlay in sync with realtime Firebase updates
   const current = viewing ? items.find((i) => i.key === viewing.key) ?? viewing : null
@@ -212,7 +299,12 @@ export default function ItemListing() {
   return (
     <div className="il">
       <main className="il-main">
-        <h1>Item Listing</h1>
+        <div className="il-head">
+          <h1>Item Listing</h1>
+          <button type="button" className="il-add" onClick={() => setShowPost(true)}>
+            <PlusIcon /> Add Item
+          </button>
+        </div>
         <p className="il-sub">View all lost and found items reported at the Main Campus.</p>
 
         {/* Filters */}
@@ -238,15 +330,13 @@ export default function ItemListing() {
 
           <select className="il-select" value={status} onChange={onFilter(setStatus)} aria-label="Filter by status">
             {FILTERS.map((f) => (
-              <option key={f.value} value={f.value}>
-                {f.value === 'all' ? 'Status' : f.label}
-              </option>
+              <option key={f.value} value={f.value}>{f.label}</option>
             ))}
           </select>
 
           <select className="il-select" value={place} onChange={onFilter(setPlace)} aria-label="Filter by location">
-            <option value="all">Location</option>
-            {places.map((p) => <option key={p} value={p}>{p}</option>)}
+            <option value="all">All Locations</option>
+            {LOCATIONS.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
 
           {hasFilters && (
@@ -324,7 +414,7 @@ export default function ItemListing() {
                       </td>
                       <td data-label="Where">{item.place}</td>
                       <td className="il-cell-action">
-                        <button type="button" className="il-view" onClick={() => setViewing(item)}>
+                        <button type="button" className="il-view" onClick={() => openView(item)}>
                           <EyeIcon /> View
                         </button>
                       </td>
@@ -394,12 +484,77 @@ export default function ItemListing() {
 
             <ErrorText message={actionError} />
 
-            {current.status === 'claimed' ? (
+            {current.status === 'claimed' && (
               <p className="il-claimed-note">This item has already been claimed.</p>
-            ) : (
-              <button type="button" className="il-claim" onClick={handleClaim} disabled={busy}>
-                {busy ? 'Saving…' : 'Claim Item'}
+            )}
+
+            {/* LOST -> Found Item button */}
+            {current.status === 'lost' && (
+              <button type="button" className="il-claim" onClick={handleFound} disabled={busy}>
+                {busy ? 'Saving…' : 'Found Item'}
               </button>
+            )}
+
+            {/* FOUND -> Claim Item button, then claiming form */}
+            {current.status === 'found' && !claiming && (
+              <button
+                type="button"
+                className="il-claim"
+                onClick={() => { setActionError(''); setClaiming(true) }}
+              >
+                Claim Item
+              </button>
+            )}
+
+            {current.status === 'found' && claiming && (
+              <form className="il-claim-form" onSubmit={handleClaim} noValidate>
+                <h3 className="il-modal-label">Claiming Form</h3>
+                <label>
+                  Student ID / Number
+                  <input
+                    name="studentId"
+                    value={claim.studentId}
+                    onChange={onClaimField}
+                    autoComplete="off"
+                    required
+                  />
+                </label>
+                <label>
+                  Student Name
+                  <input
+                    name="studentName"
+                    value={claim.studentName}
+                    onChange={onClaimField}
+                    autoComplete="name"
+                    required
+                  />
+                </label>
+                <label>
+                  Contact Number
+                  <input
+                    name="contactNumber"
+                    type="tel"
+                    inputMode="tel"
+                    value={claim.contactNumber}
+                    onChange={onClaimField}
+                    autoComplete="tel"
+                    required
+                  />
+                </label>
+                <div className="il-claim-actions">
+                  <button
+                    type="button"
+                    className="btn-outline"
+                    onClick={() => { setClaiming(false); setActionError('') }}
+                    disabled={busy}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="il-claim" disabled={busy}>
+                    {busy ? 'Saving…' : 'Submit Claim'}
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         )}
@@ -419,6 +574,23 @@ export default function ItemListing() {
           </div>
         </div>
       </Modal>
+
+      {/* Add Item (same flow as Dashboard's Post an Item) */}
+      <Modal open={showPost} onClose={() => setShowPost(false)}>
+        <PostItem onDone={() => setShowPost(false)} onResult={handleResult} />
+      </Modal>
+
+      <ResultDialog
+        result={result}
+        onPrimary={() => setResult(null)}
+        onSecondary={() => {
+          setResult(null)
+          setShowPost(result?.ok ? true : false)
+        }}
+      />
+
+      {/* Feedback message */}
+      <Toast notice={notice} onClose={() => setNotice('')} />
     </div>
   )
 }

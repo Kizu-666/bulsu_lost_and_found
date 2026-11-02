@@ -1,6 +1,8 @@
 /* Palette: --primary #f9710b | --primary-soft #f1ae70 | --bg #fce6c1 | --accent #9eb1f6 | --white #fff */
 .il {
   --il-top: 5.5rem; /* page background also fills behind the floating navbar */
+  /* one chevron for every dropdown */
+  --il-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%232b2118' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -11,9 +13,21 @@
 }
 
 .il-main { max-width: 1120px; margin: 0 auto; }
-.il-main h1 { margin: 0 0 0.35rem; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; }
+.il-main h1 { margin: 0; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; }
 .il-sub { position: relative; margin: 0 0 1.5rem; padding-bottom: 0.8rem; color: var(--muted); }
 .il-sub::after { content: ''; position: absolute; left: 0; bottom: 0; width: 3.5rem; height: 3px; border-radius: 2px; background: var(--primary); }
+
+/* title + Add Item on the same line */
+.il-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.35rem; }
+.il-add {
+  display: inline-flex; align-items: center; gap: 0.45rem; flex: none; min-height: 44px;
+  padding: 0.6rem 1.1rem; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--primary); color: #fff; font: inherit; font-weight: 700;
+  box-shadow: 0 6px 18px rgba(249, 113, 11, 0.25);
+}
+.il-add .il-ico { color: #fff; }
+.il-add:hover { filter: brightness(0.93); }
+.il-add:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
 
 /* ---------- controls ---------- */
 .il-controls { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem; }
@@ -29,19 +43,39 @@
 .il-search .il-ico { color: var(--primary); }
 
 .il-select, .il-dropdown summary {
-  min-height: 48px; border: none; border-radius: 14px; background: var(--white);
+  min-height: 48px; border: none; border-radius: 14px; background-color: var(--white);
   padding: 0 1.1rem; font: inherit; font-weight: 500; color: var(--text); cursor: pointer;
   box-shadow: 0 6px 18px rgba(249, 113, 11, 0.1);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
-.il-select:hover, .il-dropdown summary:hover { background: #fffaf3; }
+/* hover effect for all dropdowns */
+.il-select:hover, .il-dropdown summary:hover {
+  background-color: var(--bg);
+  box-shadow: 0 8px 20px rgba(249, 113, 11, 0.22);
+  transform: translateY(-1px);
+}
 .il-select:focus-visible, .il-dropdown summary:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+
+/* same chevron on selects and Date Range */
+.il-select {
+  appearance: none; -webkit-appearance: none;
+  padding-right: 2.6rem;
+  background-image: var(--il-chevron);
+  background-repeat: no-repeat;
+  background-position: right 1.1rem center;
+  background-size: 12px 8px;
+}
+.il-select option:hover, .il-select option:checked { background: var(--bg); color: var(--text); }
 .il-dropdown { position: relative; }
-.il-dropdown summary { display: flex; align-items: center; gap: 0.5rem; list-style: none; }
+.il-dropdown summary { display: flex; align-items: center; gap: 0.5rem; list-style: none; padding-right: 1.1rem; }
 .il-dropdown summary::-webkit-details-marker { display: none; }
 .il-dropdown summary::after {
-  content: ''; border-style: solid; border-width: 5px 4px 0; border-color: currentColor transparent transparent;
+  content: ''; width: 12px; height: 8px; flex: none; margin-left: 0.6rem;
+  background: var(--il-chevron) no-repeat center / 12px 8px;
+  transition: transform 0.15s ease;
 }
-.il-dropdown[open] summary { background: var(--accent); }
+.il-dropdown[open] summary { background-color: var(--accent); }
+.il-dropdown[open] summary::after { transform: rotate(180deg); }
 .il-dropdown-panel {
   position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; min-width: 230px;
   background: var(--white); border-radius: 16px; padding: 1rem;
@@ -49,6 +83,7 @@
 }
 .il-dropdown-panel label { display: grid; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
 .il-dropdown-panel input { font: inherit; padding: 0.55rem; border: 1.5px solid rgba(43, 33, 24, 0.35); border-radius: 10px; color: var(--text); }
+.il-dropdown-panel input:hover { background: #fffaf3; border-color: var(--primary); }
 .il-clear {
   min-height: 44px; padding: 0 0.9rem; background: none; border: 2px solid var(--primary); border-radius: 12px;
   color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
@@ -58,12 +93,12 @@
 /* ---------- card + toolbar ---------- */
 .il-card { background: var(--white); border-radius: 22px; overflow: hidden; box-shadow: 0 8px 24px rgba(249, 113, 11, 0.12); }
 .il-toolbar { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1.25rem; min-height: 68px; border-bottom: 1px solid rgba(43, 33, 24, 0.1); }
-.il-selected { background: var(--bg); border-radius: 10px; padding: 0.55rem 0.9rem; font-weight: 600; }
+.il-selected { background: var(--bg); border-radius: 10px; padding: 0.55rem 0.9rem; font-weight: 600; white-space: nowrap; }
 .il-hint { color: var(--muted); font-size: 0.9rem; }
 .il-remove {
   display: inline-flex; align-items: center; gap: 0.45rem; border: none; cursor: pointer; min-height: 44px;
   background: #c62828; color: #fff; font: inherit; font-weight: 600;
-  padding: 0.6rem 1.1rem; border-radius: 12px;
+  padding: 0.6rem 1.1rem; border-radius: 12px; white-space: nowrap;
 }
 .il-remove .il-ico { color: #fff; }
 .il-remove:hover { background: #a81f1f; }
@@ -125,7 +160,8 @@
 }
 .il-pager button:hover:not(:disabled) { background: var(--bg); }
 .il-pager button:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
-.il-pager button.is-active { background: var(--primary); color: var(--text); font-weight: 700; }
+.il-pager button.is-active { background: var(--primary); color: #fff; font-weight: 700; }
+.il-pager button.is-active:hover:not(:disabled) { background: var(--primary); filter: brightness(0.93); }
 .il-pager button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ---------- details overlay ---------- */
@@ -142,15 +178,51 @@
 .il-modal-desc { margin: 0 0 1.25rem; }
 .il-claim {
   width: 100%; border: none; cursor: pointer; padding: 0.85rem; border-radius: 12px;
-  background: var(--primary); color: var(--text); font: inherit; font-weight: 700; font-size: 1rem;
+  background: var(--primary); color: #fff; font: inherit; font-weight: 700; font-size: 1rem;
 }
 .il-claim:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
 .il-claim:hover:not(:disabled) { filter: brightness(0.93); }
 .il-claimed-note { margin: 0; text-align: center; color: var(--muted); }
 
+/* claiming form */
+.il-claim-form { display: grid; gap: 0.8rem; }
+.il-claim-form .il-modal-label { margin: 0; }
+.il-claim-form label { display: grid; gap: 0.3rem; font-size: 0.85rem; color: var(--muted); }
+.il-claim-form input {
+  font: inherit; font-size: 1rem; padding: 0.65rem 0.8rem; color: var(--text);
+  border: 1.5px solid rgba(43, 33, 24, 0.35); border-radius: 10px; background: var(--white);
+}
+.il-claim-form input:hover { border-color: var(--primary); }
+.il-claim-form input:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.il-claim-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 0.6rem; margin-top: 0.3rem; }
+
 .il-confirm h2 { margin: 0 0 0.5rem; padding-right: 1.5rem; }
 .il-confirm p { margin: 0 0 1rem; color: var(--muted); }
 .il-confirm-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+
+/* ---------- feedback toast ---------- */
+.il-toast {
+  position: fixed; z-index: 1000; left: 50%; bottom: 1.5rem; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 0.9rem; max-width: calc(100vw - 2rem);
+  padding: 0.85rem 1.1rem; border-radius: 14px;
+  background: #14702d; color: #fff; font-weight: 600;
+  box-shadow: 0 12px 30px rgba(43, 33, 24, 0.3);
+  animation: il-toast-in 0.2s ease-out;
+}
+.il-toast button {
+  border: none; background: none; color: #fff; font-size: 1.4rem; line-height: 1; cursor: pointer;
+  min-width: 32px; min-height: 32px; border-radius: 8px;
+}
+.il-toast button:hover { background: rgba(255, 255, 255, 0.2); }
+.il-toast button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+@keyframes il-toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .il-toast { animation: none; }
+  .il-select, .il-dropdown summary, .il-dropdown summary::after { transition: none; }
+}
 
 @media (max-width: 460px) {
   .il-modal-body { grid-template-columns: 1fr; }
@@ -168,8 +240,13 @@
   .il-search { flex-basis: 100%; }
   .il-select { flex: 1 1 140px; }
 
+  /* All + Items Selected + Remove = one line */
   .il-selectall { display: inline-flex; }
-  .il-toolbar { flex-wrap: wrap; }
+  .il-toolbar { flex-wrap: nowrap; gap: 0.5rem; padding: 0.75rem 0.9rem; }
+  .il-selectall { flex: none; }
+  .il-selected { padding: 0.4rem 0.6rem; font-size: 0.82rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .il-remove { padding: 0.5rem 0.75rem; font-size: 0.85rem; flex: none; }
+  .il-hint { font-size: 0.82rem; min-width: 0; }
 
   .il-scroll { overflow: visible; }
   .il-table { display: block; min-width: 0; }
@@ -184,11 +261,15 @@
     background: var(--white);
     border-radius: 14px;
     overflow: hidden;
+    /* top border so each item is easy to tell apart */
+    border-top: 4px solid var(--primary);
+    box-shadow: 0 4px 14px rgba(43, 33, 24, 0.1);
   }
   .il-table tr.is-selected { background: #fff1e3; }
   .il-table tbody tr:hover td { background: none; }
   .il-table tr.is-selected td { background: none; }
   .il-table td { display: block; padding: 0; border: none; }
+  .il-table tr.is-selected td:first-child { box-shadow: none; }
 
   /* 1) detail rows (generic) — label kaliwa, value kanan */
   .il-table td[data-label],
@@ -244,4 +325,8 @@
 
   .il-footer { flex-direction: column; align-items: stretch; text-align: center; }
   .il-pager { justify-content: center; }
+
+  /* Add Item stays beside the title, just more compact */
+  .il-add { padding: 0.5rem 0.9rem; font-size: 0.9rem; }
+  .il-toast { bottom: 1rem; }
 }

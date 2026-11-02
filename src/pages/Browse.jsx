@@ -86,14 +86,14 @@ function StatusPill({ status }) {
   )
 }
 
-/* Place + time (row in featured, column in modal) */
-function ItemMeta({ item, column = false }) {
+/* Place + time (featured row) */
+function ItemMeta({ item }) {
   return (
-    <p className={`bw-meta ${column ? 'bw-meta-col' : ''}`}>
+    <p className="bw-meta">
       <span><PinIcon /> {item.place}</span>
       {item.date && (
         <>
-          {!column && <i className="bw-meta-sep" aria-hidden="true" />}
+          <i className="bw-meta-sep" aria-hidden="true" />
           <span><ClockIcon /> {formatDateTime(item.date)}</span>
         </>
       )}
@@ -150,7 +150,6 @@ export default function Browse() {
           </Link>
           <nav className="bw-nav">
             <Link to="/">Home</Link>
-            <a href="/#how-claiming-works">How It Works</a>
           </nav>
         </div>
       </header>
@@ -246,9 +245,9 @@ export default function Browse() {
                     <ItemPhoto src={item.imageUrl} alt={item.name} width={300} fit="cover" />
                   </div>
                   <div className="bw-card-info">
+                    <StatusPill status={item.status} />
                     <h3>{item.name}</h3>
                     <p className="bw-card-place"><PinIcon /> {item.place}</p>
-                    <StatusPill status={item.status} />
                   </div>
                   <button type="button" className="bw-btn-outline" onClick={() => setSelected(item)}>
                     View
@@ -267,10 +266,6 @@ export default function Browse() {
           <path fill="#fb9d5f" d="M0,100 C260,55 520,40 760,70 C1020,102 1220,100 1440,60 L1440,160 L0,160 Z" />
           <path fill="#f9823a" d="M0,135 C300,100 560,95 820,115 C1080,135 1260,128 1440,105 L1440,160 L0,160 Z" />
         </svg>
-        <div className="bw-footer-inner">
-          <span>Lost and Found Main Campus</span>
-          <span className="bw-footer-loc"><PinIcon /> Bulacan State University, Main Campus</span>
-        </div>
       </footer>
 
       {/* Details modal */}
@@ -280,11 +275,41 @@ export default function Browse() {
             <div className="bw-modal-photo">
               <ItemPhoto src={selected.imageUrl} alt={selected.name} width={800} fit="cover" showLabel />
             </div>
-            <StatusPill status={selected.status} />
-            <h2>{selected.name}</h2>
-            <p className="bw-modal-id">{selected.itemId}</p>
-            <ItemMeta item={selected} column />
-            <p className="bw-desc">{selected.description}</p>
+
+            <div className="bw-modal-head">
+              <div className="bw-modal-title">
+                <h2>{selected.name}</h2>
+                <p className="bw-modal-id">{selected.itemId}</p>
+              </div>
+              <StatusPill status={selected.status} />
+            </div>
+
+            <ul className="bw-modal-details">
+              <li>
+                <span className="bw-detail-ico"><PinIcon /></span>
+                <div>
+                  <span className="bw-detail-label">Location</span>
+                  <strong>{selected.place}</strong>
+                </div>
+              </li>
+              {selected.date && (
+                <li>
+                  <span className="bw-detail-ico"><ClockIcon /></span>
+                  <div>
+                    <span className="bw-detail-label">
+                      {selected.status === 'found' ? 'Date found' : 'Date lost'}
+                    </span>
+                    <strong>{formatDateTime(selected.date)}</strong>
+                  </div>
+                </li>
+              )}
+            </ul>
+
+            <div className="bw-modal-desc">
+              <span className="bw-modal-label">Description</span>
+              <p>{selected.description || 'No description provided.'}</p>
+            </div>
+
             <p className="bw-modal-note">
               To claim this item, go to the Local Student Council and give the item ID above.
             </p>

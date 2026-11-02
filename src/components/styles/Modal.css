@@ -6,28 +6,36 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    z-index: 100;
+    z-index: 1000; /* mas mataas sa navbar */
 }
 
 .modal {
     position: relative;
-    background: var(--white);
+    background: var(--white, #fff);
     border-radius: 14px;
     width: 100%;
     max-width: 480px;
     max-height: 90vh;
     overflow-y: auto;
-    padding: 1.5rem;
+    padding: 3.5rem 1.5rem 1.5rem; /* top room so the X never touches the content */
 }
 
 .modal-close {
     position: absolute;
-    top: 0.5rem;
+    top: 0.75rem;
     right: 0.75rem;
-    background: none;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: rgba(43, 33, 24, 0.07);
     border: none;
-    font-size: 1.5rem;
-    line-height: 1;
+    border-radius: 50%;
     cursor: pointer;
-    color: var(--text);
+    color: var(--text, #2b2118);
+    transition: background 0.15s;
 }
+.modal-close:hover { background: rgba(43, 33, 24, 0.15); }
+.modal-close:focus-visible { outline: 3px solid var(--text, #2b2118); outline-offset: 2px; }
