@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import useItems from '../hooks/useItems'
 import ItemPhoto from '../components/ItemPhoto'
 import Modal from '../components/Modal'
+import SelectMenu from '../components/SelectMenu'
 import logo from '../assets/cict_logo.png'
+import './styles/ItemListing.css'
 import './styles/Browse.css'
 
 const FILTERS = [
@@ -108,7 +110,16 @@ export default function Browse() {
   const [filter, setFilter] = useState('all')
   const [sort, setSort] = useState('newest')
   const [selected, setSelected] = useState(null)
+  const [openMenu, setOpenMenu] = useState(null) // null | 'sort'
 
+  useEffect(() => {
+    if (!openMenu) return undefined
+    const closeIfOutside = (e) => {
+      if (!e.target.closest?.('.il-dropdown.is-open')) setOpenMenu(null)
+    }
+    document.addEventListener('focusin', closeIfOutside)
+    return () => document.removeEventListener('focusin', closeIfOutside)
+  }, [openMenu])
   /* Filter, sort, and pick the featured item */
   const { featured, rest } = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -197,12 +208,18 @@ export default function Browse() {
             ))}
           </div>
 
+          {openMenu && <div className="il-backdrop" aria-hidden="true" onClick={() => setOpenMenu(null)} />}
+
           <div className="bw-sort">
-            <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort items">
-              {SORTS.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
+            <SelectMenu
+              id="sort"
+              ariaLabel="Sort items"
+              value={sort}
+              options={SORTS}
+              onChange={setSort}
+              open={openMenu === 'sort'}
+              setOpen={setOpenMenu}
+            />
           </div>
         </div>
 
