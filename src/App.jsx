@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import ItemListing from './pages/ItemListing'
 import Profile from './pages/Profile'
 import PostItem from './pages/PostItem'
+import AccountList from './pages/AccountList'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/items" element={<ItemListing />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/accounts" element={<AccountList />} />
       </Route>
 
       <Route path="/post-item" element={

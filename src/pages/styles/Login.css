@@ -3,6 +3,7 @@
 
 .login {
     min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
 }
@@ -161,8 +162,7 @@
 }
 
 .login-req {
-    font-weight: 400;
-    color: var(--muted);
+    color: #b3261e;
 }
 
 /* Show / hide password button */
@@ -188,11 +188,7 @@
     height: 1.25rem;
 }
 
-.login-toggle:hover {
-    background: var(--bg);
-}
-
-.login-toggle:hover .login-toggle-icon {
+.login-toggle-icon {
     background-color: var(--text);
     opacity: 1;
 }
@@ -223,7 +219,12 @@
 
 .login-field input[aria-invalid="true"] {
     border-color: #b3261e;
-    border-width: 2px;
+    box-shadow: 0 0 0 0.5px #b3261e; /* adds the thicker look without changing layout */
+}
+
+/* keep the focus ring visible while the field is still flagged */
+.login-field input[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 4px var(--accent);
 }
 
 .login-form .login-submit {
@@ -268,6 +269,7 @@
     gap: 1rem;
     margin: 1.5rem 0 0;
     font-size: 0.9rem;
+    text-decoration: none;
 }
 
 .login-back::before,
@@ -276,19 +278,21 @@
     flex: 1;
     height: 1px;
     background: #000;
+    text-decoration: none;
 }
 
 .login-back a {
     color: var(--text);
-    text-underline-offset: 3px;
-    text-decoration-color: #000;
-    text-decoration-thickness: 2px;
+    text-decoration: none;
     border-radius: 4px;
 }
 
 .login-back a:hover {
-    background: var(--accent);
+    text-decoration: underline;
     text-decoration-color: var(--text);
+    text-underline-offset: 3px;
+    text-decoration-color: #000;
+    text-decoration-thickness: 2px;
 }
 
 /* ===== Side panel ===== */
@@ -296,7 +300,8 @@
     --wave: clamp(40px, 5vw, 80px);
     position: relative;
     isolation: isolate;
-    margin-left: calc(-1 * var(--wave)); /* extend under the wave so photo and orange share one edge */
+    overflow: hidden;
+    margin-left: calc(-1 * var(--wave)); /* extend under the wa/ve so photo and orange share one edge */
     background: var(--primary);
     color: var(--white);
     padding: clamp(1.5rem, 4vw, 3rem);
@@ -440,4 +445,65 @@
     .login-form .login-submit {
         transition: none;
     }
+}
+
+/* ===== Forgot password ===== */
+.login-forgot-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: -0.6rem 0 0.9rem;
+}
+
+.login-forgot {
+    padding: 0.5rem 0.25rem;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.login-forgot:hover{
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+.login-forgot:focus-visible {
+    outline: 3px solid var(--text);
+    outline-offset: 2px;
+}
+
+/* Popup (it renders outside the login page, so it has its own rules) */
+.login-reset {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.login-reset h2 {
+    margin: 0;
+    padding-right: 1.5rem;
+}
+
+.login-reset-text {
+    margin: 0;
+    color: var(--muted);
+}
+
+.login-reset .login-field {
+    margin-bottom: 0;
+}
+
+.login-reset-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.login-reset-actions button:disabled {
+    opacity: 0.6;
+    cursor: progress;
 }

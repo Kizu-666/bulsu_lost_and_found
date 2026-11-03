@@ -38,7 +38,7 @@ export default function Modal({ open, onClose, children }) {
             <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
           </svg>
         </button>
-        {children}
+        <div className="modal-body">{children}</div>
       </div>
     </div>,
     document.body

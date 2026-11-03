@@ -60,7 +60,7 @@
 /* Icon shows on every link, so the active one is not told apart by color alone */
 .admin-nav-link.is-active {
   background: var(--primary);
-  color: var(--text);
+  color: var(--white);
   font-weight: 600;
 }
 
@@ -98,7 +98,7 @@
 }
 
 /* Small screens: slide-in drawer from the right */
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .admin-nav {
     margin: 0.5rem 0.5rem 0;
   }

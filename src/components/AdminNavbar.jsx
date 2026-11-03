@@ -7,6 +7,7 @@ import './styles/AdminNavbar.css'
 const LINKS = [
   { to: '/dashboard', label: 'Dashboard', icon: <path d="M5 20V10M12 20V4M19 20v-7" /> },
   { to: '/items', label: 'Item Listing', icon: <path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /> },
+  { to: '/accounts', label: 'Account List', icon: <><circle cx="9" cy="8" r="3.5" /><path d="M2 20c0-3.6 3.1-6 7-6s7 2.4 7 6M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.4c2 .8 3.5 2.4 3.5 5.6" /></> },
   { to: '/profile', label: 'Profile', icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></> },
 ]
 
@@ -32,7 +33,7 @@ export default function AdminNavbar() {
   }, [open])
 
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 701px)')
+    const mq = window.matchMedia('(min-width: 901px)')
     const onChange = (e) => {
       if (e.matches) setOpen(false)
     }

@@ -7,22 +7,27 @@
     min-height: calc(100vh + 5.5rem);
     margin-top: -5.5rem; /* page background also fills behind the floating navbar */
     padding-top: 5.5rem;
+    padding-inline: 1.25rem; /* same side padding as Item Listing */
     background: linear-gradient(180deg, #fff6ea 0%, #fde9cf 100%);
 }
 
 .dash-main {
     max-width: 1120px;
     margin: 0 auto;
-    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 3rem) 4rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem) 0 4rem; /* no side padding here, so the full 1120px is used */
 }
 
 .dash-heading {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    flex-wrap: wrap;
+    align-items: flex-start; /* button lines up with the "Dashboard" title, not the subtitle */
     gap: 1rem;
     margin-bottom: 1.5rem;
+    /* no flex-wrap: the button stays on the right at every width */
+}
+
+.dash-heading > div {
+    min-width: 0; /* lets the text block shrink so the button never gets pushed off */
 }
 
 .dash-heading h1 {
@@ -50,27 +55,35 @@
 }
 
 .dash-post {
+    flex: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    min-height: 48px;
-    padding: 0.7rem 1.4rem;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0.6rem 1.1rem;
+    border: none;
     border-radius: 12px;
-    font-size: 1rem;
-    box-shadow: 0 6px 16px rgba(249, 113, 11, 0.35);
-    transition: transform 0.1s, box-shadow 0.15s;
+    cursor: pointer;
+    background: var(--primary);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(249, 113, 11, 0.25);
+    transition: transform 0.1s, filter 0.15s;
 }
 
 .dash-post:hover {
-    background: var(--primary);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(249, 113, 11, 0.45);
+    filter: brightness(0.93);
 }
 
 .dash-post:active {
     transform: translateY(1px);
 }
 
+.dash-post:focus-visible {
+    outline: 3px solid var(--text);
+    outline-offset: 2px;
+}
 .dash-error {
     display: flex;
     align-items: flex-start;
@@ -120,17 +133,22 @@
     z-index: 1;
 }
 
-.stat-lost,
+.stat-lost {
+    --stat-color: var(--status-lost);
+    --stat-tint: rgba(247, 155, 155, 0.3);
+    --stat-ink: var(--status-lost-ink);
+}
+
 .stat-found {
-    --stat-color: var(--primary);
-    --stat-tint: rgba(252, 230, 193, 0.7);
-    --stat-ink: #c2410c;
+    --stat-color: var(--status-found);
+    --stat-tint: rgba(158, 177, 246, 0.3);
+    --stat-ink: var(--status-found-ink);
 }
 
 .stat-claimed {
-    --stat-color: var(--accent);
-    --stat-tint: rgba(158, 177, 246, 0.3);
-    --stat-ink: #3b4fb0;
+    --stat-color: var(--status-claimed);
+    --stat-tint: rgba(159, 232, 184, 0.35);
+    --stat-ink: var(--status-claimed-ink);
 }
 
 .stat-icon {
@@ -173,5 +191,24 @@
 @media (prefers-reduced-motion: reduce) {
     .dash-post {
         transition: none;
+    }
+}
+@media (max-width: 760px) {
+    .dash-post {
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dash-heading p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .dash-post {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.85rem;
     }
 }

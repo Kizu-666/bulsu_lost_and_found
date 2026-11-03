@@ -45,8 +45,8 @@
 
 .navbar-links a:hover { color: var(--primary); }
 
-/* Divider before 2nd link */
-.navbar-links a:nth-child(2)::before {
+/* Divider before 2nd link (a + a, because the drawer header is also a child) */
+.navbar-links a + a::before {
   content: '';
   display: inline-block;
   width: 1px;
@@ -71,9 +71,177 @@
   color: #fff;
 }
 
-/* Mobile */
-@media (max-width: 640px) {
-  .navbar { flex-wrap: wrap; gap: 0.8rem; }
-  .navbar-links { flex-wrap: wrap; gap: 0.9rem; }
-  .navbar-links a:nth-child(2)::before { display: none; }
+/* Mobile-only pieces are hidden on desktop */
+.navbar-toggle,
+.navbar-backdrop,
+.navbar-drawer-head,
+.navbar-icon {
+  display: none;
+}
+
+/* Small screens: slide-in drawer from the right (same design as the admin navbar) */
+/* Small screens: copy of the admin navbar (white pill bar + slide-in drawer) */
+@media (max-width: 700px) {
+  .navbar {
+    top: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    max-width: none;
+    margin: 0;
+    gap: 0.5rem;
+    padding: 0.55rem 1.1rem;
+    background: var(--white);
+    border-radius: 22px;
+    box-shadow: 0 8px 24px rgba(43, 33, 24, 0.1);
+  }
+
+  .navbar-brand {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .navbar-logo {
+    height: 2.5rem;
+  }
+
+  .navbar-toggle {
+    display: block;
+    position: relative;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .navbar-toggle:hover {
+    background: var(--bg);
+  }
+
+  .navbar-toggle:focus-visible,
+  .navbar-close:focus-visible {
+    outline: 3px solid var(--text);
+  }
+
+  .navbar-toggle span {
+    position: absolute;
+    left: 0.7rem;
+    right: 0.7rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--text);
+  }
+
+  .navbar-toggle span:nth-child(1) { top: 0.95rem; }
+  .navbar-toggle span:nth-child(2) { top: 1.3rem; }
+  .navbar-toggle span:nth-child(3) { top: 1.65rem; }
+
+  .navbar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(43, 33, 24, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  .navbar-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  .navbar-links {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: auto;
+    z-index: 30;
+    width: min(80vw, 18rem);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    margin-left: 0;
+    padding: 1rem;
+    overflow-y: auto;
+    background: var(--white);
+    box-shadow: -4px 0 24px rgba(43, 33, 24, 0.18);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  .navbar-links.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  .navbar-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(43, 33, 24, 0.1);
+    font-family: var(--font-heading);
+    font-weight: 600;
+  }
+
+  .navbar-close {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .navbar-close:hover {
+    background: var(--bg);
+  }
+
+  /* Drawer links: same as .admin-nav-link */
+  .navbar-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 10px;
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .navbar-links a:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .navbar-links a.is-active,
+  .navbar-links a.is-active:hover {
+    background: var(--primary);
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .navbar-links a + a::before { display: none; }
+
+  .navbar-icon { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-backdrop,
+  .navbar-links {
+    transition: none;
+  }
 }

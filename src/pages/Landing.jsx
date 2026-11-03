@@ -7,8 +7,8 @@ import './styles/Landing.css'
 
 const lsc = {
   name: 'CICT LSC Office',
-  place: '[Building, floor, and room number]',
-  hours: '[Days and office hours]',
+  place: 'NSTP Building Room ACAD 2',
+  hours: 'Mon - Fri: 7 A.M. - 7 P.M.',
 }
 
 export default function Landing() {
@@ -42,14 +42,6 @@ export default function Landing() {
             </div>
 
             <div className="hero-tags" aria-label="Latest items">
-              {!loading && latest.length === 0 && (
-                <article className="tag tag-1">
-                  <span className="tag-hole" aria-hidden="true" />
-                  <h3 className="tag-name">No items yet</h3>
-                  <p className="tag-empty">Items posted by the CICT LSC will appear here.</p>
-                </article>
-              )}
-
               {latest.map((item, i) => (
                 <article key={item.key} className={`tag tag-${i + 1}`}>
                   <span className="tag-hole" aria-hidden="true" />

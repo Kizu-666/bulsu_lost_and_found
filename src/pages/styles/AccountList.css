@@ -1,0 +1,21 @@
+.il-pill-active   { background: rgba(159, 232, 184, 0.35); color: var(--status-claimed-ink); }
+.il-pill-inactive { background: rgba(43, 33, 24, 0.08); color: rgba(43, 33, 24, 0.75); }
+
+.il-name-text-plain { font-weight: 600; }
+.al-you {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.al-self { color: var(--muted); font-size: 0.9rem; }
+
+.il-view.al-danger { border-color: #c62828; }
+.il-view.al-danger:hover { background: #fdeceb; }
+
+.al-form-title { margin: 0; font-size: 1.4rem; letter-spacing: -0.01em; }
+.al-form-sub { margin: 0 0 0.4rem; color: var(--muted); font-size: 0.9rem; }
+
+.al-confirm-btn { width: auto; padding: 0.6rem 1.1rem; }

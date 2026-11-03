@@ -7,6 +7,25 @@ import emailIcon from '../assets/email.svg'
 import passwordIcon from '../assets/password.svg'
 import hidePassIcon from '../assets/hide_pass.svg'
 import showPassIcon from '../assets/show_pass.svg'
+import { sendPasswordResetEmail } from 'firebase/auth'
+import { auth } from '../firebase'
+import Modal from '../components/Modal'
+import FormError from '../components/FormError'
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function resetErrorMessage(code) {
+  switch (code) {
+    case 'auth/invalid-email':
+      return 'Enter a valid email address.'
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Wait a few minutes, then try again.'
+    case 'auth/network-request-failed':
+      return 'Cannot reach the server. Check your internet connection.'
+    default:
+      return 'Could not send the link. Please try again.'
+  }
+}
 
 function friendlyError(code) {
   switch (code) {
@@ -32,6 +51,13 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [invalid, setInvalid] = useState({ email: false, password: false })
+  const [showReset, setShowReset] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetBusy, setResetBusy] = useState(false)
+  const [resetError, setResetError] = useState([])
+  const [resetInvalid, setResetInvalid] = useState(false)
+  const [resetSent, setResetSent] = useState(false)
 
   useEffect(() => {
     if (loading || !user) return
@@ -46,16 +72,64 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setInvalid({ email: false, password: false })
     setSubmitting(true)
     try {
       await login(email.trim(), password)
     } catch (err) {
       setError(friendlyError(err.code))
+      setInvalid({ email: true, password: true })
     } finally {
       setSubmitting(false)
     }
   }
 
+  const openReset = () => {
+    setResetEmail(email.trim()) // reuse what they already typed
+    setResetError([])
+    setResetInvalid(false)
+    setResetSent(false)
+    setShowReset(true)
+  }
+
+  const closeReset = () => {
+    if (!resetBusy) setShowReset(false)
+  }
+
+  const handleReset = async (e) => {
+    e.preventDefault()
+    const value = resetEmail.trim()
+
+    if (!value) {
+      setResetInvalid(true)
+      setResetError(['Enter your email address.'])
+      return
+    }
+    if (!EMAIL.test(value)) {
+      setResetInvalid(true)
+      setResetError(['Enter a valid email address.'])
+      return
+    }
+
+    setResetBusy(true)
+    setResetError([])
+    setResetInvalid(false)
+    try {
+      await sendPasswordResetEmail(auth, value)
+      setResetSent(true)
+    } catch (err) {
+      if (err.code === 'auth/user-not-found') {
+        // Same message as a real send, so this form never reveals which emails have accounts
+        setResetSent(true)
+      } else {
+        console.error('Reset email failed:', err)
+        if (err.code === 'auth/invalid-email') setResetInvalid(true)
+        setResetError([resetErrorMessage(err.code)])
+      }
+    } finally {
+      setResetBusy(false)
+    }
+  }
   return (
     <main className="login" id="main">
       <section className="login-panel">
@@ -64,7 +138,7 @@ export default function Login() {
           <p className="login-sub">For CICT LSC officers only.</p>
 
           <div className="login-field">
-            <label htmlFor="email">Email <span className="login-req">(required)</span></label>
+            <label htmlFor="email">Email <span className="login-req">*</span></label>
             <div className="login-input">
               <span
                 className="login-input-icon"
@@ -73,16 +147,21 @@ export default function Login() {
               />
               <input
                 id="email" type="email" autoComplete="email"
-                aria-invalid={error ? 'true' : undefined}
+                aria-invalid={invalid.email ? 'true' : undefined}
                 aria-describedby={error ? 'login-error' : undefined}
-                value={email} onChange={(e) => setEmail(e.target.value)} required
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  if (invalid.email) setInvalid((v) => ({ ...v, email: false }))
+                }}
+                required
                 placeholder="cict@example.com"
               />
             </div>
           </div>
 
           <div className="login-field">
-            <label htmlFor="password">Password <span className="login-req">(required)</span></label>
+            <label htmlFor="password">Password <span className="login-req">*</span></label>
             <div className="login-input">
               <span
                 className="login-input-icon"
@@ -92,9 +171,14 @@ export default function Login() {
               <input
                 id="password" type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
-                aria-invalid={error ? 'true' : undefined}
+                aria-invalid={invalid.password ? 'true' : undefined}
                 aria-describedby={error ? 'login-error' : undefined}
-                value={password} onChange={(e) => setPassword(e.target.value)} required
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  if (invalid.password) setInvalid((v) => ({ ...v, password: false }))
+                }}
+                required
                 placeholder="********"
               />
               <button
@@ -110,6 +194,12 @@ export default function Login() {
                 />
               </button>
             </div>
+          </div>  
+          
+          <div className="login-forgot-row">
+            <button type="button" className="login-forgot" onClick={openReset}>
+              Forgot password?
+            </button>
           </div>
 
           {error && (
@@ -153,6 +243,58 @@ export default function Login() {
           Bulacan State University, Main Campus
         </p>
       </aside>
+      <Modal open={showReset} onClose={closeReset}>
+        {resetSent ? (
+          <div className="login-reset">
+            <h2>Check your email</h2>
+            <p className="login-reset-text">
+              If an account exists for <strong>{resetEmail.trim()}</strong>, we sent a link to set a new
+              password. It can take a few minutes, and it may land in your spam folder.
+            </p>
+            <div className="login-reset-actions">
+              <button type="button" className="btn-primary" onClick={() => setShowReset(false)}>
+                Done
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form className="login-reset" onSubmit={handleReset} noValidate>
+            <h2>Forgot password?</h2>
+            <p className="login-reset-text">
+              Enter your email and we will send you a link to set a new password.
+            </p>
+
+            <div className="login-field">
+              <label htmlFor="reset-email">Email</label>
+              <input
+                id="reset-email"
+                type="email"
+                autoComplete="email"
+                value={resetEmail}
+                onChange={(e) => {
+                  setResetEmail(e.target.value)
+                  setResetInvalid(false)
+                }}
+                aria-invalid={resetInvalid ? 'true' : undefined}
+                aria-describedby={resetInvalid ? 'reset-error' : undefined}
+                placeholder="cict@example.com"
+                required
+              />
+            </div>
+
+            <FormError message={resetError} id="reset-error" />
+
+            <div className="login-reset-actions">
+              <button type="button" className="btn-outline" onClick={closeReset} disabled={resetBusy}>
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary" disabled={resetBusy}>
+                {resetBusy ? 'Sending…' : 'Send link'}
+              </button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </main>
   )
 }

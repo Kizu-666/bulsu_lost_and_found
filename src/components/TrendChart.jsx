@@ -4,9 +4,9 @@ import {
 import './styles/TrendChart.css'
 
 const SERIES = [
-  { key: 'Found', color: '#f9710b', dash: undefined },
-  { key: 'Lost', color: '#9eb1f6', dash: '7 5' }, // dashed, so it differs without color
-  { key: 'Claimed', color: '#2b2118', dash: undefined },
+  { key: 'Found', color: 'var(--status-found)', dash: undefined },
+  { key: 'Lost', color: 'var(--status-lost)', dash: '7 5' }, // dashed, so it differs without color
+  { key: 'Claimed', color: 'var(--status-claimed)', dash: undefined },
 ]
 
 const INK = 'rgba(43, 33, 24, 0.68)'
@@ -60,8 +60,8 @@ export default function TrendChart({ data }) {
               {SERIES.map((s) => (
                 <Line
                   key={s.key} type="linear" dataKey={s.key}
-                  stroke={s.color} strokeWidth={3} strokeDasharray={s.dash}
-                  dot={{ r: 4.5, fill: s.color, stroke: '#ffffff', strokeWidth: 2 }}
+                  stroke={s.color} strokeWidth={3.5} strokeDasharray={s.dash}
+                  dot={{ r: 5, fill: s.color, stroke: '#ffffff', strokeWidth: 2 }}
                   activeDot={{ r: 7, fill: s.color, stroke: '#2b2118', strokeWidth: 2 }}
                 />
               ))}

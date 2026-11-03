@@ -64,7 +64,7 @@ export default function Dashboard() {
             <h1>Dashboard</h1>
             <p>Overview of the items recorded by the CICT LSC.</p>
           </div>
-          <button className="btn-primary dash-post" onClick={() => setShowPost(true)}>
+          <button className="dash-post" onClick={() => setShowPost(true)}>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
               strokeWidth="2.5" strokeLinecap="round" aria-hidden="true" focusable="false">
               <path d="M12 5v14M5 12h14" />

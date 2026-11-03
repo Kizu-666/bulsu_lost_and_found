@@ -18,7 +18,8 @@ const FILTERS = [
 
 const PAGE_SIZE = 6 // pager shows only when items exceed this
 const EMPTY_CLAIM = { studentId: '', studentName: '', contactNumber: '' }
-
+const STUDENT_NO = /^\d{10}$/
+const PH_MOBILE = /^09\d{9}$/
 const plural = (n) => (n > 1 ? 's' : '')
 
 /* "Oct 12, 2024" + "10:30 AM" */
@@ -77,6 +78,23 @@ function ErrorText({ message }) {
   return <p className="il-state il-state-error" role="alert">{message}</p>
 }
 
+function FormError({ message, id }) {
+  const lines = (Array.isArray(message) ? message : [message]).filter(Boolean)
+  if (lines.length === 0) return null
+  return (
+    <div className="il-form-error" id={id} role="alert">
+      <svg className="il-form-error-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+        <path d="M12 3 2 21h20L12 3Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M12 10v5M12 17.8v.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+      {lines.length === 1 ? (
+        <span>{lines[0]}</span>
+      ) : (
+        <ul>{lines.map((l) => <li key={l}>{l}</li>)}</ul>
+      )}
+    </div>
+  )
+}
 /* Feedback message after an action (auto-hides) */
 function Toast({ notice, onClose }) {
   useEffect(() => {
@@ -116,6 +134,7 @@ export default function ItemListing() {
   /* Add Item = same as "Post an Item" on the Dashboard */
   const [showPost, setShowPost] = useState(false)
   const [result, setResult] = useState(null)
+  const [claimInvalid, setClaimInvalid] = useState({})
 
   const handleResult = (r) => {
     setResult(r)
@@ -243,21 +262,47 @@ export default function ItemListing() {
   }
 
   /* FOUND item -> owner claims it (with claiming form) */
-  const onClaimField = (e) => setClaim((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  const onClaimField = (e) => {
+    const { name } = e.target
+    let value = e.target.value
+
+    if (name === 'studentId') {
+      value = value.replace(/\D/g, '').slice(0, 10)
+    }
+
+    if (name === 'contactNumber') {
+      let digits = value.replace(/\D/g, '')
+      if (digits.startsWith('639')) digits = `0${digits.slice(2)}`
+      value = digits.slice(0, 11)
+    }
+
+    setClaim((prev) => ({ ...prev, [name]: value }))
+    setClaimInvalid((prev) => (prev[name] ? { ...prev, [name]: false } : prev))
+  }
 
   const handleClaim = (e) => {
     e.preventDefault()
     if (!viewing) return
+    setActionError('')
+    setClaimInvalid({})
+
     const studentId = claim.studentId.trim()
     const studentName = claim.studentName.trim()
     const contactNumber = claim.contactNumber.trim()
 
-    if (!studentId || !studentName || !contactNumber) {
-      setActionError('Please fill in all the fields.')
-      return
-    }
-    if (!/^[0-9+\-\s()]{7,15}$/.test(contactNumber)) {
-      setActionError('Please enter a valid contact number.')
+    const errors = {}
+
+    if (!studentId) errors.studentId = 'Enter the student number.'
+    else if (!STUDENT_NO.test(studentId)) errors.studentId = 'Student number must be 10 digits (e.g. 2020100450).'
+
+    if (!studentName) errors.studentName = 'Enter the student name.'
+
+    if (!contactNumber) errors.contactNumber = 'Enter the contact number.'
+    else if (!PH_MOBILE.test(contactNumber)) errors.contactNumber = 'Contact number must be 11 digits starting with 09 (e.g. 09123456789).'
+
+    if (Object.keys(errors).length > 0) {
+      setClaimInvalid(Object.fromEntries(Object.keys(errors).map((k) => [k, true])))
+      setActionError(Object.values(errors))
       return
     }
 
@@ -281,6 +326,7 @@ export default function ItemListing() {
   const openView = (item) => {
     setClaiming(false)
     setClaim(EMPTY_CLAIM)
+    setClaimInvalid({})
     setActionError('')
     setViewing(item)
   }
@@ -290,11 +336,13 @@ export default function ItemListing() {
     setActionError('')
     setClaiming(false)
     setClaim(EMPTY_CLAIM)
+    setClaimInvalid({})
   }
 
   // Keeps the overlay in sync with realtime Firebase updates
   const current = viewing ? items.find((i) => i.key === viewing.key) ?? viewing : null
   const when = current ? splitDateTime(current.date) : null
+  const claimedWhen = current?.claimedAt ? splitDateTime(current.claimedAt) : null
 
   return (
     <div className="il">
@@ -302,7 +350,7 @@ export default function ItemListing() {
         <div className="il-head">
           <h1>Item Listing</h1>
           <button type="button" className="il-add" onClick={() => setShowPost(true)}>
-            <PlusIcon /> Add Item
+            <PlusIcon /> Post an Item
           </button>
         </div>
         <p className="il-sub">View all lost and found items reported at the Main Campus.</p>
@@ -379,7 +427,7 @@ export default function ItemListing() {
                   <th>Status</th>
                   <th>When Lost or Found</th>
                   <th>Where Lost or Found</th>
-                  <th>Action (View)</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -482,12 +530,34 @@ export default function ItemListing() {
             <h3 className="il-modal-label">Description</h3>
             <p className="il-modal-desc">{current.description || 'No description provided.'}</p>
 
-            <ErrorText message={actionError} />
-
             {current.status === 'claimed' && (
-              <p className="il-claimed-note">This item has already been claimed.</p>
+              <section className="il-claimed-by" aria-label="Claimed by">
+                <h3 className="il-modal-label">Claimed By</h3>
+                {current.claimedBy ? (
+                  <dl className="il-claimed-fields">
+                    <dt>Student Name</dt>
+                    <dd>{current.claimedBy.studentName}</dd>
+                    <dt>Student ID / Number</dt>
+                    <dd>{current.claimedBy.studentId}</dd>
+                    <dt>Contact Number</dt>
+                    <dd>
+                      <a href={`tel:${current.claimedBy.contactNumber}`}>
+                        {current.claimedBy.contactNumber}
+                      </a>
+                    </dd>
+                    {claimedWhen && (
+                      <>
+                        <dt>Date Claimed</dt>
+                        <dd>{claimedWhen.date}{claimedWhen.time && `, ${claimedWhen.time}`}</dd>
+                      </>
+                    )}
+                  </dl>
+                ) : (
+                  <p className="il-claimed-note">This item has already been claimed.</p>
+                )}
+              </section>
             )}
-
+            {!claiming && <FormError message={actionError} />}
             {/* LOST -> Found Item button */}
             {current.status === 'lost' && (
               <button type="button" className="il-claim" onClick={handleFound} disabled={busy}>
@@ -510,12 +580,17 @@ export default function ItemListing() {
               <form className="il-claim-form" onSubmit={handleClaim} noValidate>
                 <h3 className="il-modal-label">Claiming Form</h3>
                 <label>
-                  Student ID / Number
+                  Student Number
                   <input
                     name="studentId"
                     value={claim.studentId}
                     onChange={onClaimField}
+                    inputMode="numeric"
+                    maxLength={10}
                     autoComplete="off"
+                    placeholder="e.g. 2020100450"
+                    aria-invalid={claimInvalid.studentId ? 'true' : undefined}
+                    aria-describedby={claimInvalid.studentId ? 'claim-error' : undefined}
                     required
                   />
                 </label>
@@ -526,6 +601,9 @@ export default function ItemListing() {
                     value={claim.studentName}
                     onChange={onClaimField}
                     autoComplete="name"
+                    placeholder="e.g. Juan Dela Cruz"
+                    aria-invalid={claimInvalid.studentName ? 'true' : undefined}
+                    aria-describedby={claimInvalid.studentName ? 'claim-error' : undefined}
                     required
                   />
                 </label>
@@ -534,18 +612,23 @@ export default function ItemListing() {
                   <input
                     name="contactNumber"
                     type="tel"
-                    inputMode="tel"
+                    inputMode="numeric"
+                    maxLength={11}
                     value={claim.contactNumber}
                     onChange={onClaimField}
                     autoComplete="tel"
+                    placeholder="e.g. 09123456789"
+                    aria-invalid={claimInvalid.contactNumber ? 'true' : undefined}
+                    aria-describedby={claimInvalid.contactNumber ? 'claim-error' : undefined}
                     required
                   />
                 </label>
+                <FormError message={actionError} id="claim-error" />
                 <div className="il-claim-actions">
                   <button
                     type="button"
                     className="btn-outline"
-                    onClick={() => { setClaiming(false); setActionError('') }}
+                    onClick={() => { setClaiming(false); setActionError(''); setClaimInvalid({}) }}
                     disabled={busy}
                   >
                     Cancel

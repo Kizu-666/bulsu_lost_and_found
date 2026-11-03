@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
       if (u) {
         try {
           const snap = await get(ref(db, `users/${u.uid}`))
-          admin = snap.exists() && snap.val().role === 'admin'
+          admin = snap.exists() && snap.val().role === 'admin' && snap.val().active !== false
         } catch (err) {
           console.error('Role check failed:', err)
         }

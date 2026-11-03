@@ -9,6 +9,13 @@
 
   --font-heading: 'Poppins', sans-serif;
   --font-body: 'Inter', sans-serif;
+
+  --status-lost: #f79b9b;
+  --status-lost-ink: #b42318;
+  --status-found: #9eb1f6;   /* same as --accent */
+  --status-found-ink: #3b4fb0;
+  --status-claimed: #9fe8b8;
+  --status-claimed-ink: #1e7a45;
 }
 
 * {
@@ -28,7 +35,7 @@ h1, h2, h3 {
 
 .btn-primary {
   background: var(--primary);
-  color: var(--text);
+  color: var(--white);
   border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
