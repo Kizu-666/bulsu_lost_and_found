@@ -4,7 +4,6 @@
   /* one chevron for every dropdown */
   --il-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%232b2118' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   position: relative;
-  isolation: isolate;
   overflow: hidden;
   min-height: calc(100vh + var(--il-top));
   margin-top: calc(-1 * var(--il-top));
@@ -42,40 +41,50 @@
 .il-ico { width: 18px; height: 18px; flex: none; color: var(--text); }
 .il-search .il-ico { color: var(--primary); }
 
-.il-select, .il-dropdown summary {
+/* ---------- dropdowns (Date Range, Status, Location share one style) ---------- */
+.il-dropdown { position: relative; }
+.il-dropdown.is-open { z-index: 20; }
+.il-dropdown-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
   min-height: 48px; border: none; border-radius: 14px; background-color: var(--white);
   padding: 0 1.1rem; font: inherit; font-weight: 500; color: var(--text); cursor: pointer;
   box-shadow: 0 6px 18px rgba(249, 113, 11, 0.1);
   transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
-/* hover effect for all dropdowns */
-.il-select:hover, .il-dropdown summary:hover {
+.il-dropdown-btn::after {
+  content: ''; width: 12px; height: 8px; flex: none;
+  background: var(--il-chevron) no-repeat center / 12px 8px;
+  transition: transform 0.15s ease;
+}
+/* hover effect only while CLOSED */
+.il-dropdown:not(.is-open) .il-dropdown-btn:hover {
   background-color: var(--bg);
   box-shadow: 0 8px 20px rgba(249, 113, 11, 0.22);
   transform: translateY(-1px);
 }
-.il-select:focus-visible, .il-dropdown summary:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.il-dropdown-btn:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+/* open: blue button, arrow points up */
+.il-dropdown.is-open .il-dropdown-btn { background-color: var(--accent); }
+.il-dropdown.is-open .il-dropdown-btn::after { transform: rotate(180deg); }
 
-/* same chevron on selects and Date Range */
-.il-select {
-  appearance: none; -webkit-appearance: none;
-  padding-right: 2.6rem;
-  background-image: var(--il-chevron);
-  background-repeat: no-repeat;
-  background-position: right 1.1rem center;
-  background-size: 12px 8px;
+/* click-catcher: while a dropdown is open, the other controls can't be pressed */
+.il-backdrop { position: fixed; inset: 0; z-index: 10; background: transparent; }
+
+/* option list (Status / Location) */
+.il-dropdown-select .il-dropdown-panel {
+  min-width: 100%; width: max-content; max-width: min(320px, 90vw); padding: 0.4rem; gap: 0;
 }
-.il-select option:hover, .il-select option:checked { background: var(--bg); color: var(--text); }
-.il-dropdown { position: relative; }
-.il-dropdown summary { display: flex; align-items: center; gap: 0.5rem; list-style: none; padding-right: 1.1rem; }
-.il-dropdown summary::-webkit-details-marker { display: none; }
-.il-dropdown summary::after {
-  content: ''; width: 12px; height: 8px; flex: none; margin-left: 0.6rem;
-  background: var(--il-chevron) no-repeat center / 12px 8px;
-  transition: transform 0.15s ease;
+.il-menu { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-height: 280px; overflow-y: auto; }
+.il-menu-opt {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.6rem 0.8rem; border-radius: 10px; cursor: pointer; white-space: nowrap;
+  color: var(--text); font-weight: 500;
 }
-.il-dropdown[open] summary { background-color: var(--accent); }
-.il-dropdown[open] summary::after { transform: rotate(180deg); }
+.il-menu-opt:hover { background: var(--bg); }
+.il-menu-opt:focus { outline: none; background: var(--bg); }
+.il-menu-opt:focus-visible { box-shadow: inset 0 0 0 2px var(--text); }
+.il-menu-opt[aria-selected="true"] { font-weight: 700; }
+.il-menu-opt[aria-selected="true"]::after { content: '\2713'; color: var(--primary); font-weight: 700; }
 .il-dropdown-panel {
   position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; min-width: 230px;
   background: var(--white); border-radius: 16px; padding: 1rem;
@@ -222,7 +231,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .il-toast { animation: none; }
-  .il-select, .il-dropdown summary, .il-dropdown summary::after { transition: none; }
+  .il-dropdown-btn, .il-dropdown-btn::after { transition: none; }
 }
 
 @media (max-width: 460px) {
@@ -239,7 +248,8 @@
   .il { padding: calc(var(--il-top) + 1rem) 1.25rem 2rem; }
   .il-main h1 { font-size: 1.6rem; }
   .il-search { flex-basis: 100%; }
-  .il-select { flex: 1 1 140px; }
+  .il-dropdown-select { flex: 1 1 140px; }
+  .il-dropdown-select .il-dropdown-btn { width: 100%; }
 
   /* All + Items Selected + Remove = one line */
   .il-selectall { display: inline-flex; }
@@ -345,7 +355,7 @@
   border-radius: 12px;
   background: rgba(159, 232, 184, 0.2);
 }
-.il-claimed-by .il-modal-label { margin-top: 0; }
+.il-claimed-by .il-modal-label { margin-top: 0; font-weight: 700; }
 .il-claimed-fields {
   margin: 0;
   display: grid;
