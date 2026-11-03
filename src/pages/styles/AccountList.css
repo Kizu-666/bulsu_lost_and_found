@@ -26,11 +26,39 @@
   .al-bulk-btn { padding: 0.5rem 0.75rem; font-size: 0.85rem; flex: none; }
 }
 
-/* Role dropdown inside the Add Account form (same look as the text inputs) */
-.il-claim-form select {
-  font: inherit; font-size: 1rem; padding: 0.65rem 0.8rem; color: var(--text);
-  border: 1.5px solid rgba(43, 33, 24, 0.35); border-radius: 10px; background: var(--white);
+/* Role menu inside the Add Account form: same look as the All Status filter, full width */
+.al-field {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
-.il-claim-form select:hover { border-color: var(--primary); }
-.il-claim-form select:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+
+.il-claim-form .il-dropdown.il-dropdown-select {
+  display: block;
+  width: 100%;
+}
+
+.il-claim-form .il-dropdown.il-dropdown-select .il-dropdown-btn {
+  width: 100%;
+}
+
+.il-claim-form .il-dropdown.il-dropdown-select .il-dropdown-panel {
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.il-claim-form .il-dropdown.il-dropdown-select .il-menu {
+  width: 100%;
+}
+
+.il-claim-form .il-dropdown.il-dropdown-select .il-menu-opt {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .al-role-hint { margin: -0.3rem 0 0; color: var(--muted); font-size: 0.85rem; }

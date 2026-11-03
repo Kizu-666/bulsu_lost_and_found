@@ -66,7 +66,7 @@ export default function AccountList() {
   const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
-    const [openMenu, setOpenMenu] = useState(null) // null | 'status'
+  const [openMenu, setOpenMenu] = useState(null) // null | 'status' | 'role'
 
   /* Tabbing out of an open dropdown closes it */
   useEffect(() => {
@@ -75,7 +75,11 @@ export default function AccountList() {
       if (!e.target.closest?.('.il-dropdown.is-open')) setOpenMenu(null)
     }
     document.addEventListener('focusin', closeIfOutside)
-    return () => document.removeEventListener('focusin', closeIfOutside)
+    document.addEventListener('pointerdown', closeIfOutside)
+    return () => {
+      document.removeEventListener('focusin', closeIfOutside)
+      document.removeEventListener('pointerdown', closeIfOutside)
+    }
   }, [openMenu])
 
   const list = useMemo(() => {
@@ -161,14 +165,19 @@ export default function AccountList() {
   }
   const hasFilters = query || status !== 'all'
 
-  /* ---------- Add account ---------- */
   const openAdd = () => {
     setForm(EMPTY_FORM)
     setInvalid({})
     setFormError([])
+    setOpenMenu(null)
     setAdding(true)
   }
-  const closeAdd = () => !busy && setAdding(false)
+
+  const closeAdd = () => {
+    if (busy) return
+    setOpenMenu(null)
+    setAdding(false)
+  }
 
   const onField = (e) => {
     const { name, value } = e.target
@@ -314,7 +323,7 @@ export default function AccountList() {
               aria-label="Search accounts"
             />
           </label>
-          {openMenu && <div className="il-backdrop" aria-hidden="true" onClick={() => setOpenMenu(null)} />}
+          {openMenu === 'status' && <div className="il-backdrop" aria-hidden="true" onClick={() => setOpenMenu(null)} />}
 
           <SelectMenu
             id="status"
@@ -492,14 +501,18 @@ export default function AccountList() {
               required
             />
           </label>
-          <label>
-            Role
-            <select name="role" value={form.role} onChange={onField}>
-              {ROLES.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
-              ))}
-            </select>
-          </label>
+          <div className="al-field">
+            <span>Role</span>
+            <SelectMenu
+              id="role"
+              ariaLabel="Role"
+              value={form.role}
+              options={ROLES}
+              onChange={(v) => setForm((prev) => ({ ...prev, role: v }))}
+              open={openMenu === 'role'}
+              setOpen={setOpenMenu}
+            />
+          </div>
           <p className="al-role-hint">
             {form.role === 'admin'
               ? 'Administrators can also add, deactivate and reactivate accounts.'
