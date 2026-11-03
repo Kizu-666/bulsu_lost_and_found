@@ -60,10 +60,7 @@ export default function Dashboard() {
     <div className="dash">
       <main className="dash-main">
         <div className="dash-heading">
-          <div>
-            <h1>Dashboard</h1>
-            <p>Overview of the items recorded by the CICT LSC.</p>
-          </div>
+          <h1>Dashboard</h1>
           <button className="dash-post" onClick={() => setShowPost(true)}>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
               strokeWidth="2.5" strokeLinecap="round" aria-hidden="true" focusable="false">
@@ -72,6 +69,7 @@ export default function Dashboard() {
             Post an Item
           </button>
         </div>
+        <p className="dash-sub">Overview of the items recorded by the CICT LSC.</p>
 
         {error && <p className="dash-error" role="alert">{error}</p>}
 

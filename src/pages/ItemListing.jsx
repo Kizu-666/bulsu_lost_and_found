@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ref, update, serverTimestamp } from 'firebase/database'
+import { ref, update, get, onValue, serverTimestamp } from 'firebase/database'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import useAccounts from '../hooks/useAccounts'
@@ -10,6 +10,7 @@ import ResultDialog from '../components/ResultDialog'
 import PostItem from './PostItem'
 import { LOCATIONS } from '../constants/locations'
 import './styles/ItemListing.css'
+import SelectMenu, { Dropdown } from '../components/SelectMenu'
 
 const FILTERS = [
   { value: 'all', label: 'All Status' },
@@ -98,119 +99,6 @@ function FormError({ message, id }) {
   )
 }
 
-/* One dropdown shell for Date Range, Status and Location:
-   same button, same arrow, same open color. Only one can be open at a time. */
-function Dropdown({ id, label, open, setOpen, btnRef, popup = 'true', className = '', onButtonKeyDown, children }) {
-  const close = () => {
-    setOpen(null)
-    btnRef.current?.focus()
-  }
-  return (
-    <div className={`il-dropdown ${className}${open ? ' is-open' : ''}`}>
-      <button
-        ref={btnRef}
-        type="button"
-        className="il-dropdown-btn"
-        aria-haspopup={popup}
-        aria-expanded={open}
-        aria-controls={open ? `il-menu-${id}` : undefined}
-        onClick={() => setOpen(open ? null : id)}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape' && open) setOpen(null)
-          onButtonKeyDown?.(e)
-        }}
-      >
-        {label}
-      </button>
-      {open && (
-        <div
-          className="il-dropdown-panel"
-          id={`il-menu-${id}`}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') { e.preventDefault(); close() }
-          }}
-        >
-          {children}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* Status / Location: custom list (keyboard: arrows, Home/End, Enter/Space, Esc) */
-function SelectMenu({ id, value, options, onChange, ariaLabel, open, setOpen }) {
-  const btnRef = useRef(null)
-  const listRef = useRef(null)
-  const current = options.find((o) => o.value === value) ?? options[0]
-
-  /* move focus into the list when it opens */
-  useEffect(() => {
-    if (!open) return
-    const list = listRef.current
-    const target = list?.querySelector('[aria-selected="true"]') ?? list?.querySelector('[role="option"]')
-    target?.focus()
-  }, [open])
-
-  const choose = (v) => {
-    onChange(v)
-    setOpen(null)
-    btnRef.current?.focus()
-  }
-
-  const onListKey = (e) => {
-    const opts = [...listRef.current.querySelectorAll('[role="option"]')]
-    const i = opts.indexOf(document.activeElement)
-    let next = null
-    if (e.key === 'ArrowDown') next = opts[(i + 1) % opts.length]
-    else if (e.key === 'ArrowUp') next = opts[(i - 1 + opts.length) % opts.length]
-    else if (e.key === 'Home') next = opts[0]
-    else if (e.key === 'End') next = opts[opts.length - 1]
-    if (next) {
-      e.preventDefault()
-      next.focus()
-    }
-  }
-
-  return (
-    <Dropdown
-      id={id}
-      label={current.label}
-      open={open}
-      setOpen={setOpen}
-      btnRef={btnRef}
-      popup="listbox"
-      className="il-dropdown-select"
-      onButtonKeyDown={(e) => {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-          e.preventDefault()
-          setOpen(id)
-        }
-      }}
-    >
-      <ul className="il-menu" role="listbox" aria-label={ariaLabel} ref={listRef} onKeyDown={onListKey}>
-        {options.map((o) => (
-          <li
-            key={o.value}
-            role="option"
-            tabIndex={-1}
-            className="il-menu-opt"
-            aria-selected={o.value === value}
-            onClick={() => choose(o.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                choose(o.value)
-              }
-            }}
-          >
-            {o.label}
-          </li>
-        ))}
-      </ul>
-    </Dropdown>
-  )
-}
-
 /* Feedback message after an action (auto-hides) */
 function Toast({ notice, onClose }) {
   useEffect(() => {
@@ -231,8 +119,7 @@ function Toast({ notice, onClose }) {
 export default function ItemListing() {
   const { items, loading, error } = useItems()
   const { user } = useAuth()
-  const { accounts } = useAccounts()
-  const myAccount = accounts.find((a) => a.uid === user?.uid) // name comes from the Account List
+  const { accounts } = useAccounts() // full list: admins only (officers get an empty list)
 
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
@@ -267,6 +154,7 @@ export default function ItemListing() {
   const [notice, setNotice] = useState('') // success feedback
   const [claiming, setClaiming] = useState(false) // claim form open?
   const [claim, setClaim] = useState(EMPTY_CLAIM)
+  const [liveName, setLiveName] = useState('') // current name of whoever processed the open claim
 
   /* Add Item = same as "Post an Item" on the Dashboard */
   const [showPost, setShowPost] = useState(false)
@@ -445,6 +333,10 @@ export default function ItemListing() {
 
     return runAction(
       async () => {
+        // own record: readable by both admins and officers
+        const nameSnap = await get(ref(db, `users/${user.uid}/name`))
+        const officerName = nameSnap.val() || user?.displayName || 'Unknown account'
+
         await update(ref(db, `items/${viewing.key}`), {
           status: 'claimed',
           claimedAt: serverTimestamp(),
@@ -452,7 +344,7 @@ export default function ItemListing() {
           // account (LSC officer / super admin) who processed the claim
           processedBy: {
             uid: user?.uid ?? null,
-            name: myAccount?.name || user?.displayName || user?.email || 'Unknown account',
+            name: officerName,
           },
         })
         setViewing(null)
@@ -485,6 +377,24 @@ export default function ItemListing() {
   const current = viewing ? items.find((i) => i.key === viewing.key) ?? viewing : null
   const when = current ? splitDateTime(current.date) : null
   const claimedWhen = current?.claimedAt ? splitDateTime(current.claimedAt) : null
+
+  /* Live name of whoever processed the claim (name is readable by every signed-in account).
+     Falls back to the list (admins) and then to the name saved with the claim. */
+  const processedUid = current?.processedBy?.uid
+  useEffect(() => {
+    setLiveName('')
+    if (!processedUid) return undefined
+    return onValue(
+      ref(db, `users/${processedUid}/name`),
+      (snap) => setLiveName(snap.val() || ''),
+      () => setLiveName('')
+    )
+  }, [processedUid])
+
+  const processedByName =
+    liveName ||
+    accounts.find((a) => a.uid === processedUid)?.name ||
+    current?.processedBy?.name
 
   return (
     <div className="il">
@@ -696,10 +606,10 @@ export default function ItemListing() {
                         {current.claimedBy.contactNumber}
                       </a>
                     </dd>
-                    {current.processedBy?.name && (
+                    {processedByName && (
                       <>
                         <dt>Processed By</dt>
-                        <dd>{current.processedBy.name}</dd>
+                        <dd>{processedByName}</dd>
                       </>
                     )}
                     {claimedWhen && (

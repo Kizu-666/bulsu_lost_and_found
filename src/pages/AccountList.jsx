@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ref, set, update, serverTimestamp } from 'firebase/database'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
@@ -9,6 +9,7 @@ import FormError from '../components/FormError'
 import Toast from '../components/Toast'
 import './styles/ItemListing.css'
 import './styles/AccountList.css'
+import SelectMenu from '../components/SelectMenu'
 
 const EMPTY_FORM = { name: '', email: '', role: 'officer' }
 const ROLES = [
@@ -65,6 +66,17 @@ export default function AccountList() {
   const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
+    const [openMenu, setOpenMenu] = useState(null) // null | 'status'
+
+  /* Tabbing out of an open dropdown closes it */
+  useEffect(() => {
+    if (!openMenu) return undefined
+    const closeIfOutside = (e) => {
+      if (!e.target.closest?.('.il-dropdown.is-open')) setOpenMenu(null)
+    }
+    document.addEventListener('focusin', closeIfOutside)
+    return () => document.removeEventListener('focusin', closeIfOutside)
+  }, [openMenu])
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -139,11 +151,6 @@ export default function AccountList() {
 
   const onSearch = (e) => {
     setQuery(e.target.value)
-    setPage(1)
-  }
-
-  const onStatus = (e) => {
-    setStatus(e.target.value)
     setPage(1)
   }
 
@@ -307,11 +314,17 @@ export default function AccountList() {
               aria-label="Search accounts"
             />
           </label>
-          <select className="il-select" value={status} onChange={onStatus} aria-label="Filter by status">
-            {FILTERS.map((f) => (
-              <option key={f.value} value={f.value}>{f.label}</option>
-            ))}
-          </select>
+          {openMenu && <div className="il-backdrop" aria-hidden="true" onClick={() => setOpenMenu(null)} />}
+
+          <SelectMenu
+            id="status"
+            ariaLabel="Filter by status"
+            value={status}
+            options={FILTERS}
+            onChange={(v) => { setStatus(v); setPage(1) }}
+            open={openMenu === 'status'}
+            setOpen={setOpenMenu}
+          />
 
           {hasFilters && (
             <button type="button" className="il-clear" onClick={clearFilters}>Clear</button>

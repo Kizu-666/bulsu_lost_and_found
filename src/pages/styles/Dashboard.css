@@ -1,29 +1,27 @@
 /* Palette: --primary #f9710b | --primary-soft #f1ae70 | --bg #fce6c1 | --accent #9eb1f6 | --white #fff */
 
 .dash {
+    --dash-top: 5.5rem; /* page background also fills behind the floating navbar */
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    min-height: calc(100vh + 5.5rem);
-    margin-top: -5.5rem; /* page background also fills behind the floating navbar */
-    padding-top: 5.5rem;
-    padding-inline: 1.25rem; /* same side padding as Item Listing */
+    min-height: calc(100vh + var(--dash-top));
+    margin-top: calc(-1 * var(--dash-top));
+    padding: calc(var(--dash-top) + 1.5rem) 1.25rem 3rem; /* same as .il */
     background: linear-gradient(180deg, #fff6ea 0%, #fde9cf 100%);
 }
 
 .dash-main {
     max-width: 1120px;
-    margin: 0 auto;
-    padding: clamp(1.5rem, 4vw, 2.5rem) 0 4rem; /* no side padding here, so the full 1120px is used */
+    margin: 0 auto; /* no extra padding: the .dash padding sets the spacing, like .il-main */
 }
 
 .dash-heading {
     display: flex;
+    align-items: center; /* button lines up with the title, same as .il-head */
     justify-content: space-between;
-    align-items: flex-start; /* button lines up with the "Dashboard" title, not the subtitle */
     gap: 1rem;
-    margin-bottom: 1.5rem;
-    /* no flex-wrap: the button stays on the right at every width */
+    margin-bottom: 0.35rem;
 }
 
 .dash-heading > div {
@@ -31,9 +29,10 @@
 }
 
 .dash-heading h1 {
+    min-width: 0;
+    margin: 0;
     font-size: clamp(2rem, 4vw, 2.75rem);
     letter-spacing: -0.02em;
-    margin: 0 0 0.35rem;
 }
 
 .dash-heading p {
@@ -93,6 +92,24 @@
     border-radius: 10px;
     background: #fdeceb;
     color: #8c1d18;
+}
+
+.dash-sub {
+    position: relative;
+    margin: 0 0 1.5rem;
+    padding-bottom: 0.8rem;
+    color: var(--muted);
+}
+
+.dash-sub::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 3.5rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--primary);
 }
 
 /* Totals */
@@ -201,7 +218,7 @@
 }
 
 @media (max-width: 480px) {
-    .dash-heading p {
+    .dash-sub {
         font-size: 0.9rem;
     }
 }
@@ -212,3 +229,4 @@
         font-size: 0.85rem;
     }
 }
+

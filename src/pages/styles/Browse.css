@@ -191,18 +191,33 @@
 .bw-state { margin: 1.5rem 0; color: var(--bw-muted); }
 .bw-state-error { color: #b42318; }
 
-/* ===== Pills & icons ===== */
+/* Same look as the admin status pills (.il-pill) */
 .bw-pill {
-  display: inline-block;
-  padding: 0.28rem 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 999px;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
-.bw-pill-lost { background: var(--bw-orange); }
-.bw-pill-found { background: var(--bw-teal); }
+
+.bw-pill i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.bw-pill-lost {
+  background: rgba(247, 155, 155, 0.3);
+  color: var(--status-lost-ink);
+}
+
+.bw-pill-found {
+  background: rgba(158, 177, 246, 0.3);
+  color: var(--status-found-ink);
+}
 
 .bw-ico { width: 16px; height: 16px; flex-shrink: 0; color: var(--bw-orange); }
 
@@ -451,10 +466,51 @@
 @media (max-width: 640px) {
   .bw-header-inner { height: auto; padding-block: 0.7rem; }
   .bw-nav { gap: 1.2rem; }
+
+  /* Controls: search full width, chips share one row, sort full width */
   .bw-controls { gap: 0.6rem; }
+  .bw-search { flex-basis: 100%; }
+  .bw-filters { width: 100%; gap: 0.5rem; }
+  .bw-chip { flex: 1; padding: 0 0.5rem; }
   .bw-sort { margin-left: 0; width: 100%; }
   .bw-sort select { width: 100%; }
-  .bw-card { flex-wrap: wrap; }
-  .bw-card-photo { width: 100px; height: 80px; }
+
+  /* Featured item: photo, then details, then a full-width button */
+  .bw-featured { padding: 0.9rem 1rem 1rem; }
+  .bw-featured-body {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.9rem;
+  }
   .bw-featured-photo { width: 100%; height: 180px; }
+  .bw-featured-info { flex: none; width: 100%; }
+  .bw-btn-solid { margin-left: 0; align-self: stretch; justify-content: center; }
+
+  /* Place and time on separate lines, no leftover divider */
+  .bw-meta { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+  .bw-meta-sep { display: none; }
+
+  /* Recent cards: photo + info side by side, View button full width below */
+  .bw-card {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr);
+    align-items: start;
+    gap: 0.7rem 0.9rem;
+    padding: 0.85rem;
+  }
+  .bw-card-photo { width: 100px; height: 80px; }
+  .bw-card-info h3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .bw-btn-outline {
+    grid-column: 1 / -1;
+    align-self: stretch;
+    width: 100%;
+    padding: 0.55rem 1rem;
+  }
 }

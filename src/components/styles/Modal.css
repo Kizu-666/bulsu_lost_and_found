@@ -49,3 +49,10 @@
 }
 .modal-close:hover { background: rgba(43, 33, 24, 0.15); }
 .modal-close:focus-visible { outline: 3px solid var(--text, #2b2118); outline-offset: 2px; }
+
+@media (max-width: 400px) {
+    .modal {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}

@@ -48,6 +48,7 @@ export default function Landing() {
 
                   <div className="tag-head">
                     <span className={`tag-status tag-status-${item.status}`}>
+                      <i aria-hidden="true" />
                       {item.status === 'found' ? 'Found' : 'Lost'}
                     </span>
                     <ItemPhoto src={item.imageUrl} width={120} className="tag-photo" />

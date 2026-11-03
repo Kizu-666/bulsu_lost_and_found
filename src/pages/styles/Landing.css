@@ -156,16 +156,33 @@
   border-radius: 8px;
 }
 
+/* Same look as the admin status pills (.il-pill) */
 .tag-status {
-  display: inline-block;
-  padding: 0.15rem 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 999px;
-  color: var(--text);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
-.tag-status-found { background: var(--primary); }
-.tag-status-lost { background: var(--accent); }
+
+.tag-status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tag-status-lost {
+  background: rgba(247, 155, 155, 0.3);
+  color: var(--status-lost-ink);
+}
+
+.tag-status-found {
+  background: rgba(158, 177, 246, 0.3);
+  color: var(--status-found-ink);
+}
 
 .tag-name {
   margin: 0.6rem 0 0.75rem;

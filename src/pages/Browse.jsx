@@ -81,7 +81,8 @@ const InfoIcon = () => (
 function StatusPill({ status }) {
   return (
     <span className={`bw-pill bw-pill-${status}`}>
-      {status === 'found' ? 'FOUND' : 'LOST'}
+      <i aria-hidden="true" />
+      {status === 'found' ? 'Found' : 'Lost'}
     </span>
   )
 }
@@ -212,7 +213,7 @@ export default function Browse() {
         {/* Featured item */}
         {featured && (
           <section className="bw-featured" aria-label="Featured item">
-            <p className="bw-featured-label"><StarIcon /> FEATURED ITEM</p>
+            <p className="bw-featured-label"><StarIcon /> RECENT ITEM</p>
             <div className="bw-featured-body">
               <div className="bw-featured-photo">
                 <ItemPhoto src={featured.imageUrl} alt={featured.name} width={400} fit="cover" />

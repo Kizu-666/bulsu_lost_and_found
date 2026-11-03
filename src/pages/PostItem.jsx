@@ -5,13 +5,20 @@ import { useAuth } from '../context/AuthContext'
 import { uploadImage, validateImage } from '../utils/uploadImage'
 import { LOCATIONS } from '../constants/locations'
 import './styles/PostItem.css'
+import SelectMenu from '../components/SelectMenu'
 
-const emptyForm = { name: '', description: '', date: '', place: '', customPlace: '' }
+const emptyForm = { name: '', description: '', day: '', time: '', place: '', customPlace: '' }
+const PLACE_OPTIONS = LOCATIONS.map((p) => ({ value: p, label: p }))
 
 function makeItemId() {
   const year = new Date().getFullYear()
   const code = Math.random().toString(36).substring(2, 6).toUpperCase()
   return `CICT-${year}-${code}`
+}
+
+function nowParts() {
+  const iso = nowLocal() // "2026-11-03T14:05"
+  return { today: iso.slice(0, 10), nowTime: iso.slice(11, 16) }
 }
 
 function withTimeout(promise, ms) {
@@ -52,6 +59,18 @@ export default function PostItem({ onDone, onResult }) {
   const [preview, setPreview] = useState('')
   const fileInput = useRef(null)
   const [photoError, setPhotoError] = useState('')
+  const [openMenu, setOpenMenu] = useState(null) // null | 'place'
+  const { today, nowTime } = nowParts()
+
+  /* Tabbing out of an open dropdown closes it */
+  useEffect(() => {
+    if (!openMenu) return undefined
+    const closeIfOutside = (e) => {
+      if (!e.target.closest?.('.il-dropdown.is-open')) setOpenMenu(null)
+    }
+    document.addEventListener('focusin', closeIfOutside)
+    return () => document.removeEventListener('focusin', closeIfOutside)
+  }, [openMenu])
 
   const draft = useRef(null)
   useEffect(() => {
@@ -84,8 +103,8 @@ export default function PostItem({ onDone, onResult }) {
   }
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
-  const handlePlaceChange = (e) =>
-    setForm({ ...form, place: e.target.value, customPlace: '' })
+  const handlePlaceChange = (value) =>
+    setForm((f) => ({ ...f, place: value, customPlace: '' }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -93,6 +112,11 @@ export default function PostItem({ onDone, onResult }) {
 
     if (isFound && !file) {
       setError('Add a photo of the found item.')
+      return
+    }
+
+    if (!form.place) {
+      setError(isFound ? 'Select where the item was found.' : 'Select where the item was lost.')
       return
     }
 
@@ -126,7 +150,7 @@ export default function PostItem({ onDone, onResult }) {
           name: form.name.trim(),
           description: form.description.trim(),
           status,
-          date: form.date,
+          date: `${form.day}T${form.time}`,
           place: form.place === 'Others' ? form.customPlace.trim() : form.place,
           placeCategory: form.place,
           imageUrl,
@@ -191,21 +215,36 @@ export default function PostItem({ onDone, onResult }) {
       </div>
 
       <div className="post-field">
-        <label htmlFor="item-date">{isFound ? 'When found' : 'When lost'} <span className='required'>*</span></label>
-        <input
-          id="item-date" type="datetime-local" name="date" max={nowLocal()}
-          value={form.date} onChange={handleChange} required
-        />
+        <span className="post-label" id="item-when-label">
+          {isFound ? 'When found' : 'When lost'} <span className="required">*</span>
+        </span>
+        <div className="post-when" role="group" aria-labelledby="item-when-label">
+          <input
+            id="item-day" type="date" name="day" aria-label="Date"
+            max={today} value={form.day} onChange={handleChange} required
+          />
+          <input
+            id="item-time" type="time" name="time" aria-label="Time"
+            max={form.day === today ? nowTime : undefined}
+            value={form.time} onChange={handleChange} required
+          />
+        </div>
       </div>
 
       <div className="post-field">
         <label htmlFor="item-place">{isFound ? 'Where found' : 'Where lost'} <span className='required'>*</span></label>
-        <select id="item-place" name="place" value={form.place} onChange={handlePlaceChange} required>
-          <option value="" disabled>Select location</option>
-          {LOCATIONS.map((location) => (
-            <option key={location} value={location}>{location}</option>
-          ))}
-        </select>
+        {openMenu && <div className="il-backdrop" aria-hidden="true" onClick={() => setOpenMenu(null)} />}
+        <SelectMenu
+          id="place"
+          buttonId="item-place"
+          ariaLabel="Location"
+          value={form.place}
+          options={PLACE_OPTIONS}
+          placeholder="Select location"
+          onChange={handlePlaceChange}
+          open={openMenu === 'place'}
+          setOpen={setOpenMenu}
+        />
         {form.place === 'Others' && (
           <input
             className="post-custom-place"
