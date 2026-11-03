@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
+import RequireAccountAdmin from './components/RequireAccountAdmin'
 import AdminLayout from './components/AdminLayout'
 import Landing from './pages/Landing'
 import Browse from './pages/Browse'
@@ -22,7 +23,14 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/items" element={<ItemListing />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/accounts" element={<AccountList />} />
+        <Route
+          path="/accounts"
+          element={
+            <RequireAccountAdmin>
+              <AccountList />
+            </RequireAccountAdmin>
+          }
+        />
       </Route>
 
       <Route path="/post-item" element={

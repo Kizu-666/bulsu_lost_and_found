@@ -76,7 +76,7 @@ function PasswordField({ label, value, onChange, autoComplete, invalid, describe
 }
 
 export default function Profile() {
-  const { user } = useAuth()
+  const { user, role } = useAuth()
   const fileInput = useRef(null)
 
   /* Account record (name) from the database */
@@ -307,7 +307,7 @@ export default function Profile() {
             </div>
 
             <h2 className="profile-name">{name}</h2>
-            <p className="profile-role">Administrator</p>
+            <p className="profile-role">{role === 'admin' ? 'Administrator' : 'LSC Officer'}</p>
             {photoError && <p className="profile-error" role="alert">{photoError}</p>}
           </div>
 
