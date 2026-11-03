@@ -230,37 +230,34 @@
 .login-form .login-submit {
     width: 100%;
     min-height: 48px;
-    padding: 0.9rem 1.2rem;
-    font-size: 1rem;
+    padding: 0.6rem 1.1rem;
+    border: none;
     border-radius: 12px;
-    box-shadow: 0 4px 0 #c4570a;
+    background: var(--primary);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(249, 113, 11, 0.25);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
-    transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s;
+    gap: 0.45rem;
+    transition: filter 0.15s;
 }
 
 .login-form .login-submit:hover:not(:disabled) {
-    background: var(--primary);
-    transform: translateY(-1px);
-    box-shadow: 0 5px 0 #c4570a;
-}
-
-.login-form .login-submit:active:not(:disabled) {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 #c4570a;
+    filter: brightness(0.93);
 }
 
 .login-form .login-submit:focus-visible {
     outline: 3px solid var(--text);
-    outline-offset: 3px;
+    outline-offset: 2px;
 }
 
 .login-form .login-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    box-shadow: none;
 }
 
 .login-back {

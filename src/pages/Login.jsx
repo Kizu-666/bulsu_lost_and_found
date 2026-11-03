@@ -212,7 +212,7 @@ export default function Login() {
             </p>
           )}
 
-          <button className="btn-primary login-submit" type="submit" disabled={submitting}>
+          <button className="login-submit" type="submit" disabled={submitting}>
             {submitting ? 'Signing in…' : (<>Sign in <span aria-hidden="true">→</span></>)}
           </button>
 

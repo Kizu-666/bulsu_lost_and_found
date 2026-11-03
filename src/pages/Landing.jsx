@@ -36,7 +36,7 @@ export default function Landing() {
                 then claim it at the LSC office with your student ID.
               </p>
               <div className="hero-actions">
-                <Link to="/browse" className="btn-primary hero-btn">Browse items</Link>
+                <Link to="/browse" className="hero-btn">Browse items</Link>
                 <a href="#how-claiming-works" className="hero-link">How claiming works</a>
               </div>
             </div>

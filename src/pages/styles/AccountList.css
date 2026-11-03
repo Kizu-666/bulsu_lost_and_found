@@ -33,7 +33,18 @@
   font-size: 0.85rem;
   color: var(--muted);
 }
+.il-claim-form .al-field .il-dropdown .il-dropdown-btn {
+  width: 100%;
+  min-height: 2.75rem;
+  text-align: left;
+  border: 1.5px solid rgba(43, 33, 24, 0.35);
+}
 
+/* keep the same border on hover and while the list is open */
+.il-claim-form .al-field .il-dropdown .il-dropdown-btn:hover,
+.il-claim-form .al-field .il-dropdown.is-open .il-dropdown-btn {
+  border: 1.5px solid rgba(43, 33, 24, 0.35);
+}
 .il-claim-form .il-dropdown.il-dropdown-select {
   display: block;
   width: 100%;
