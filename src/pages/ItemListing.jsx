@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ref, update, serverTimestamp } from 'firebase/database'
 import { db } from '../firebase'
+import { useAuth } from '../context/AuthContext'
+import useAccounts from '../hooks/useAccounts'
 import useItems from '../hooks/useItems'
 import ItemPhoto from '../components/ItemPhoto'
 import Modal from '../components/Modal'
@@ -95,6 +97,120 @@ function FormError({ message, id }) {
     </div>
   )
 }
+
+/* One dropdown shell for Date Range, Status and Location:
+   same button, same arrow, same open color. Only one can be open at a time. */
+function Dropdown({ id, label, open, setOpen, btnRef, popup = 'true', className = '', onButtonKeyDown, children }) {
+  const close = () => {
+    setOpen(null)
+    btnRef.current?.focus()
+  }
+  return (
+    <div className={`il-dropdown ${className}${open ? ' is-open' : ''}`}>
+      <button
+        ref={btnRef}
+        type="button"
+        className="il-dropdown-btn"
+        aria-haspopup={popup}
+        aria-expanded={open}
+        aria-controls={open ? `il-menu-${id}` : undefined}
+        onClick={() => setOpen(open ? null : id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape' && open) setOpen(null)
+          onButtonKeyDown?.(e)
+        }}
+      >
+        {label}
+      </button>
+      {open && (
+        <div
+          className="il-dropdown-panel"
+          id={`il-menu-${id}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') { e.preventDefault(); close() }
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* Status / Location: custom list (keyboard: arrows, Home/End, Enter/Space, Esc) */
+function SelectMenu({ id, value, options, onChange, ariaLabel, open, setOpen }) {
+  const btnRef = useRef(null)
+  const listRef = useRef(null)
+  const current = options.find((o) => o.value === value) ?? options[0]
+
+  /* move focus into the list when it opens */
+  useEffect(() => {
+    if (!open) return
+    const list = listRef.current
+    const target = list?.querySelector('[aria-selected="true"]') ?? list?.querySelector('[role="option"]')
+    target?.focus()
+  }, [open])
+
+  const choose = (v) => {
+    onChange(v)
+    setOpen(null)
+    btnRef.current?.focus()
+  }
+
+  const onListKey = (e) => {
+    const opts = [...listRef.current.querySelectorAll('[role="option"]')]
+    const i = opts.indexOf(document.activeElement)
+    let next = null
+    if (e.key === 'ArrowDown') next = opts[(i + 1) % opts.length]
+    else if (e.key === 'ArrowUp') next = opts[(i - 1 + opts.length) % opts.length]
+    else if (e.key === 'Home') next = opts[0]
+    else if (e.key === 'End') next = opts[opts.length - 1]
+    if (next) {
+      e.preventDefault()
+      next.focus()
+    }
+  }
+
+  return (
+    <Dropdown
+      id={id}
+      label={current.label}
+      open={open}
+      setOpen={setOpen}
+      btnRef={btnRef}
+      popup="listbox"
+      className="il-dropdown-select"
+      onButtonKeyDown={(e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault()
+          setOpen(id)
+        }
+      }}
+    >
+      <ul className="il-menu" role="listbox" aria-label={ariaLabel} ref={listRef} onKeyDown={onListKey}>
+        {options.map((o) => (
+          <li
+            key={o.value}
+            role="option"
+            tabIndex={-1}
+            className="il-menu-opt"
+            aria-selected={o.value === value}
+            onClick={() => choose(o.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                choose(o.value)
+              }
+            }}
+          >
+            {o.label}
+          </li>
+        ))}
+      </ul>
+    </Dropdown>
+  )
+}
+
 /* Feedback message after an action (auto-hides) */
 function Toast({ notice, onClose }) {
   useEffect(() => {
@@ -114,6 +230,9 @@ function Toast({ notice, onClose }) {
 
 export default function ItemListing() {
   const { items, loading, error } = useItems()
+  const { user } = useAuth()
+  const { accounts } = useAccounts()
+  const myAccount = accounts.find((a) => a.uid === user?.uid) // name comes from the Account List
 
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
@@ -121,6 +240,24 @@ export default function ItemListing() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [page, setPage] = useState(1)
+
+  /* which dropdown is open: null | 'date' | 'status' | 'place' (only one at a time) */
+  const [openMenu, setOpenMenu] = useState(null)
+  const dateBtnRef = useRef(null)
+  const placeOptions = [
+    { value: 'all', label: 'All Locations' },
+    ...LOCATIONS.map((p) => ({ value: p, label: p })),
+  ]
+
+  /* Tabbing out of an open dropdown closes it */
+  useEffect(() => {
+    if (!openMenu) return undefined
+    const closeIfOutside = (e) => {
+      if (!e.target.closest?.('.il-dropdown.is-open')) setOpenMenu(null)
+    }
+    document.addEventListener('focusin', closeIfOutside)
+    return () => document.removeEventListener('focusin', closeIfOutside)
+  }, [openMenu])
 
   const [selectedKeys, setSelectedKeys] = useState(new Set())
   const [viewing, setViewing] = useState(null) // item shown in the overlay
@@ -312,6 +449,11 @@ export default function ItemListing() {
           status: 'claimed',
           claimedAt: serverTimestamp(),
           claimedBy: { studentId, studentName, contactNumber },
+          // account (LSC officer / super admin) who processed the claim
+          processedBy: {
+            uid: user?.uid ?? null,
+            name: myAccount?.name || user?.displayName || user?.email || 'Unknown account',
+          },
         })
         setViewing(null)
         setClaiming(false)
@@ -368,24 +510,33 @@ export default function ItemListing() {
             />
           </label>
 
-          <details className="il-dropdown">
-            <summary>Date Range</summary>
-            <div className="il-dropdown-panel">
-              <label>From <input type="date" value={from} onChange={onFilter(setFrom)} /></label>
-              <label>To <input type="date" value={to} onChange={onFilter(setTo)} /></label>
-            </div>
-          </details>
+          {/* While a dropdown is open, this catches clicks so nothing else can be pressed */}
+          {openMenu && <div className="il-backdrop" aria-hidden="true" onClick={() => setOpenMenu(null)} />}
 
-          <select className="il-select" value={status} onChange={onFilter(setStatus)} aria-label="Filter by status">
-            {FILTERS.map((f) => (
-              <option key={f.value} value={f.value}>{f.label}</option>
-            ))}
-          </select>
+          <Dropdown id="date" label="Date Range" open={openMenu === 'date'} setOpen={setOpenMenu} btnRef={dateBtnRef}>
+            <label>From <input type="date" value={from} onChange={onFilter(setFrom)} /></label>
+            <label>To <input type="date" value={to} onChange={onFilter(setTo)} /></label>
+          </Dropdown>
 
-          <select className="il-select" value={place} onChange={onFilter(setPlace)} aria-label="Filter by location">
-            <option value="all">All Locations</option>
-            {LOCATIONS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+          <SelectMenu
+            id="status"
+            ariaLabel="Filter by status"
+            value={status}
+            options={FILTERS}
+            onChange={(v) => { setStatus(v); setPage(1) }}
+            open={openMenu === 'status'}
+            setOpen={setOpenMenu}
+          />
+
+          <SelectMenu
+            id="place"
+            ariaLabel="Filter by location"
+            value={place}
+            options={placeOptions}
+            onChange={(v) => { setPlace(v); setPage(1) }}
+            open={openMenu === 'place'}
+            setOpen={setOpenMenu}
+          />
 
           {hasFilters && (
             <button type="button" className="il-clear" onClick={clearFilters}>Clear</button>
@@ -545,6 +696,12 @@ export default function ItemListing() {
                         {current.claimedBy.contactNumber}
                       </a>
                     </dd>
+                    {current.processedBy?.name && (
+                      <>
+                        <dt>Processed By</dt>
+                        <dd>{current.processedBy.name}</dd>
+                      </>
+                    )}
                     {claimedWhen && (
                       <>
                         <dt>Date Claimed</dt>
