@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import './styles/Login.css'
@@ -58,6 +58,7 @@ export default function Login() {
   const [resetError, setResetError] = useState([])
   const [resetInvalid, setResetInvalid] = useState(false)
   const [resetSent, setResetSent] = useState(false)
+  const passwordRef = useRef(null)
 
   useEffect(() => {
     if (loading || !user) return
@@ -78,7 +79,8 @@ export default function Login() {
       await login(email.trim(), password)
     } catch (err) {
       setError(friendlyError(err.code))
-      setInvalid({ email: true, password: true })
+      passwordRef.current?.focus()
+      passwordRef.current?.select()
     } finally {
       setSubmitting(false)
     }
@@ -170,6 +172,7 @@ export default function Login() {
               />
               <input
                 id="password" type={showPassword ? 'text' : 'password'}
+                ref={passwordRef}
                 autoComplete="current-password"
                 aria-invalid={invalid.password ? 'true' : undefined}
                 aria-describedby={error ? 'login-error' : undefined}
@@ -231,7 +234,7 @@ export default function Login() {
         <div className="login-aside-body">
           <p className="login-pitch">Keep the lost and found list up to date.</p>
           <p className="login-pitch-sub">
-            Post items, track their status, and record claims at the CICT LSC.
+            Post items, track their status and record claims at the CICT LSC.
           </p>
         </div>
 

@@ -228,3 +228,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Turned in by (found items) */
+.post-section {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem 0.1rem;
+  border: 1px solid rgba(43, 33, 24, 0.12);
+  border-left: 4px solid var(--primary);
+  border-radius: 12px;
+  background: #fffaf3;
+}
+
+.post-section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}

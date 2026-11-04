@@ -111,7 +111,8 @@
 
 .login-field input:focus {
     border-color: var(--text);
-    box-shadow: 0 0 0 4px var(--accent);
+    outline: 3px solid var(--text);
+    outline-offset: 2px;
 }
 
 /* Browser autofill: replace the default yellow with the palette */
@@ -125,7 +126,7 @@
 }
 
 .login-field input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px var(--white) inset, 0 0 0 4px var(--accent);
+    -webkit-box-shadow: 0 0 0 1000px var(--white) inset;
 }
 
 /* Input with icons */
@@ -223,10 +224,10 @@
 }
 
 /* keep the focus ring visible while the field is still flagged */
+/* a flagged field keeps its red border while focused; the black outline still shows */
 .login-field input[aria-invalid="true"]:focus {
-    box-shadow: 0 0 0 4px var(--accent);
+    border-color: #b3261e;
 }
-
 .login-form .login-submit {
     width: 100%;
     min-height: 48px;

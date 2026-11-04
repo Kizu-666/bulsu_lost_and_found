@@ -11,6 +11,8 @@ import PostItem from './PostItem'
 import { LOCATIONS } from '../constants/locations'
 import './styles/ItemListing.css'
 import SelectMenu, { Dropdown } from '../components/SelectMenu'
+import { uploadImage, validateImage } from '../utils/uploadImage'
+import { STUDENT_NO, PH_MOBILE, cleanStudentNo, cleanPhone } from '../utils/validators'
 
 const FILTERS = [
   { value: 'all', label: 'All Status' },
@@ -20,10 +22,28 @@ const FILTERS = [
 ]
 
 const PAGE_SIZE = 6 // pager shows only when items exceed this
-const EMPTY_CLAIM = { studentId: '', studentName: '', contactNumber: '' }
-const STUDENT_NO = /^\d{10}$/
-const PH_MOBILE = /^09\d{9}$/
+const EMPTY_CLAIM = { studentId: '', studentName: '', contactNumber: '', proofOfOwnership: '' }
 const plural = (n) => (n > 1 ? 's' : '')
+const EMPTY_FOUND = {
+  day: '', time: '', place: '', customPlace: '',
+  finderName: '', finderStudentId: '', finderContact: '',
+}
+const PLACE_OPTIONS = LOCATIONS.map((p) => ({ value: p, label: p }))
+
+function nowParts() {
+  const d = new Date()
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+  const iso = d.toISOString().slice(0, 16)
+  return { today: iso.slice(0, 10), nowTime: iso.slice(11, 16) }
+}
+
+/* turnedInBy is a group now; older items saved just the name as text */
+function finderOf(item) {
+  const t = item?.turnedInBy
+  if (!t) return null
+  return typeof t === 'string' ? { name: t } : t
+}
+
 
 /* "Oct 12, 2024" + "10:30 AM" */
 function splitDateTime(value) {
@@ -156,10 +176,41 @@ export default function ItemListing() {
   const [claim, setClaim] = useState(EMPTY_CLAIM)
   const [liveName, setLiveName] = useState('') // current name of whoever processed the open claim
 
+  /* Lost -> found form */
+  const [markingFound, setMarkingFound] = useState(false) // found form open?
+  const [found, setFound] = useState(EMPTY_FOUND)
+  const [foundInvalid, setFoundInvalid] = useState({})
+  const [foundFile, setFoundFile] = useState(null)
+  const [foundPreview, setFoundPreview] = useState('')
+  const [foundMenu, setFoundMenu] = useState(null) // null | 'found-place'
+  const foundFileInput = useRef(null)
+  const { today, nowTime } = nowParts()
+
   /* Add Item = same as "Post an Item" on the Dashboard */
   const [showPost, setShowPost] = useState(false)
   const [result, setResult] = useState(null)
   const [claimInvalid, setClaimInvalid] = useState({})
+
+  /* Free the preview image when it changes or the page closes */
+  useEffect(() => {
+    return () => {
+      if (foundPreview) URL.revokeObjectURL(foundPreview)
+    }
+  }, [foundPreview])
+
+  /* Clicking or tabbing out of the open location list closes it */
+  useEffect(() => {
+    if (!foundMenu) return undefined
+    const closeIfOutside = (e) => {
+      if (!e.target.closest?.('.il-dropdown.is-open')) setFoundMenu(null)
+    }
+    document.addEventListener('focusin', closeIfOutside)
+    document.addEventListener('pointerdown', closeIfOutside)
+    return () => {
+      document.removeEventListener('focusin', closeIfOutside)
+      document.removeEventListener('pointerdown', closeIfOutside)
+    }
+  }, [foundMenu])
 
   const handleResult = (r) => {
     setResult(r)
@@ -183,7 +234,7 @@ export default function ItemListing() {
           if (toT && t > toT) return false
         }
         if (q) {
-          return [item.name, item.itemId, item.place, item.description]
+          return [item.name, item.itemId, item.place, item.description, item.lostBy?.name]
             .filter(Boolean)
             .some((f) => f.toLowerCase().includes(q))
         }
@@ -269,16 +320,117 @@ export default function ItemListing() {
     )
   }
 
-  /* LOST item -> someone found it: status becomes "found" */
-  const handleFound = () => {
+  /* LOST item -> someone found it: ask for the found details first */
+  const resetFound = () => {
+    setMarkingFound(false)
+    setFound(EMPTY_FOUND)
+    setFoundInvalid({})
+    setFoundFile(null)
+    setFoundPreview('')
+    setFoundMenu(null)
+  }
+
+  const onFoundField = (e) => {
+    const { name } = e.target
+    let value = e.target.value
+    if (name === 'finderStudentId') value = cleanStudentNo(value)
+    if (name === 'finderContact') value = cleanPhone(value)
+    setFound((prev) => ({ ...prev, [name]: value }))
+    setFoundInvalid((prev) => (prev[name] ? { ...prev, [name]: false } : prev))
+  }
+
+  const onFoundPlace = (value) => {
+    setFound((prev) => ({ ...prev, place: value, customPlace: '' }))
+    setFoundInvalid((prev) => ({ ...prev, place: false, customPlace: false }))
+  }
+
+  const onFoundFile = (e) => {
+    const picked = e.target.files?.[0]
+    e.target.value = ''
+    if (!picked) return
+
+    const problem = validateImage(picked)
+    if (problem) {
+      setFoundInvalid((prev) => ({ ...prev, photo: true }))
+      setActionError(problem)
+      return
+    }
+
+    setActionError('')
+    setFoundInvalid((prev) => ({ ...prev, photo: false }))
+    setFoundFile(picked)
+    setFoundPreview(URL.createObjectURL(picked))
+  }
+
+  const removeFoundPhoto = () => {
+    setFoundFile(null)
+    setFoundPreview('')
+  }
+
+  const handleFound = (e) => {
+    e.preventDefault()
     if (!viewing) return
+    setActionError('')
+    setFoundInvalid({})
+
+    const now = nowParts()
+    const future =
+      !!found.day && !!found.time &&
+      (found.day > now.today || (found.day === now.today && found.time > now.nowTime))
+
+    const bad = {
+      day: !found.day || future,
+      time: !found.time || future,
+      place: !found.place,
+      customPlace: found.place === 'Others' && !found.customPlace.trim(),
+      finderName: !found.finderName.trim(),
+      finderStudentId: !!found.finderStudentId && !STUDENT_NO.test(found.finderStudentId),
+      finderContact: !PH_MOBILE.test(found.finderContact),
+      photo: !foundFile,
+    }
+
+    const messages = []
+    if (!found.day || !found.time) messages.push('Enter when the item was found.')
+    else if (future) messages.push('The date and time cannot be in the future.')
+    if (bad.place) messages.push('Select where the item was found.')
+    else if (bad.customPlace) messages.push('Enter the specific location.')
+    if (bad.finderName) messages.push('Enter the name of the person who turned in the item.')
+    if (bad.finderStudentId) messages.push('Student number must be 10 digits (e.g. 2020100450).')
+    if (!found.finderContact) messages.push('Enter the contact number of the person who turned in the item.')
+    else if (bad.finderContact) messages.push('Contact number must be 11 digits starting with 09 (e.g. 09123456789).')
+    if (bad.photo) messages.push('Add a photo of the found item.')
+
+    if (messages.length > 0) {
+      setFoundInvalid(bad)
+      setActionError(messages)
+      return
+    }
+
     return runAction(
       async () => {
+        const imageUrl = await uploadImage(foundFile)
         await update(ref(db, `items/${viewing.key}`), {
           status: 'found',
           foundAt: serverTimestamp(),
+          date: `${found.day}T${found.time}`,
+          place: found.place === 'Others' ? found.customPlace.trim() : found.place,
+          placeCategory: found.place,
+          imageUrl,
+          turnedInBy: {
+            name: found.finderName.trim(),
+            contactNumber: found.finderContact,
+            ...(found.finderStudentId ? { studentId: found.finderStudentId } : {}),
+          },
+          // keep the original lost report
+          lostReport: {
+            date: viewing.date ?? null,
+            place: viewing.place ?? null,
+            placeCategory: viewing.placeCategory ?? null,
+            imageUrl: viewing.imageUrl ?? null,
+          },
         })
         setViewing(null)
+        resetFound()
       },
       'Your account does not have permission to update items.',
       'Could not update the item. Try again.',
@@ -314,16 +466,21 @@ export default function ItemListing() {
     const studentId = claim.studentId.trim()
     const studentName = claim.studentName.trim()
     const contactNumber = claim.contactNumber.trim()
+    const proofOfOwnership = claim.proofOfOwnership.trim()
 
     const errors = {}
 
-    if (!studentId) errors.studentId = 'Enter the student number.'
-    else if (!STUDENT_NO.test(studentId)) errors.studentId = 'Student number must be 10 digits (e.g. 2020100450).'
+    if (!studentName) errors.studentName = 'Enter the name.'
 
-    if (!studentName) errors.studentName = 'Enter the student name.'
+    if (studentId && !STUDENT_NO.test(studentId)) {
+      errors.studentId = 'Student number must be 10 digits (e.g. 2020100450), or leave it blank.'
+    }
 
     if (!contactNumber) errors.contactNumber = 'Enter the contact number.'
     else if (!PH_MOBILE.test(contactNumber)) errors.contactNumber = 'Contact number must be 11 digits starting with 09 (e.g. 09123456789).'
+
+    if (!proofOfOwnership) errors.proofOfOwnership = 'Enter the proof of ownership.'
+    else if (proofOfOwnership.length < 10) errors.proofOfOwnership = 'Describe the proof of ownership in at least 10 characters.'
 
     if (Object.keys(errors).length > 0) {
       setClaimInvalid(Object.fromEntries(Object.keys(errors).map((k) => [k, true])))
@@ -340,7 +497,12 @@ export default function ItemListing() {
         await update(ref(db, `items/${viewing.key}`), {
           status: 'claimed',
           claimedAt: serverTimestamp(),
-          claimedBy: { studentId, studentName, contactNumber },
+          claimedBy: {
+            studentName,
+            contactNumber,
+            proofOfOwnership,
+            ...(studentId ? { studentId } : {}),
+          },
           // account (LSC officer / super admin) who processed the claim
           processedBy: {
             uid: user?.uid ?? null,
@@ -363,6 +525,7 @@ export default function ItemListing() {
     setClaimInvalid({})
     setActionError('')
     setViewing(item)
+    resetFound()
   }
 
   const closeView = () => {
@@ -371,11 +534,13 @@ export default function ItemListing() {
     setClaiming(false)
     setClaim(EMPTY_CLAIM)
     setClaimInvalid({})
+    resetFound()
   }
 
   // Keeps the overlay in sync with realtime Firebase updates
   const current = viewing ? items.find((i) => i.key === viewing.key) ?? viewing : null
   const when = current ? splitDateTime(current.date) : null
+  const finder = finderOf(current)
   const claimedWhen = current?.claimedAt ? splitDateTime(current.claimedAt) : null
 
   /* Live name of whoever processed the claim (name is readable by every signed-in account).
@@ -405,7 +570,7 @@ export default function ItemListing() {
             <PlusIcon /> Post an Item
           </button>
         </div>
-        <p className="il-sub">View all lost and found items reported at the Main Campus.</p>
+        <p className="il-sub">View all lost and found items reported around Pimentel Hall.</p>
 
         {/* Filters */}
         <div className="il-controls">
@@ -591,21 +756,79 @@ export default function ItemListing() {
             <h3 className="il-modal-label">Description</h3>
             <p className="il-modal-desc">{current.description || 'No description provided.'}</p>
 
+            {current.lostBy && (
+              <section className="il-claimed-by il-lost-by" aria-label="Lost by">
+                <h3 className="il-modal-label">Lost By</h3>
+                <dl className="il-claimed-fields">
+                  <dt>Name</dt>
+                  <dd>{current.lostBy.name}</dd>
+                  {current.lostBy.studentId && (
+                    <>
+                      <dt>Student Number</dt>
+                      <dd>{current.lostBy.studentId}</dd>
+                    </>
+                  )}
+                  {current.lostBy.contactNumber && (
+                    <>
+                      <dt>Contact Number</dt>
+                      <dd>
+                        <a href={`tel:${current.lostBy.contactNumber}`}>{current.lostBy.contactNumber}</a>
+                      </dd>
+                    </>
+                  )}
+                </dl>
+              </section>
+            )}
+
+            {finder && (
+              <section className="il-claimed-by il-finder-by" aria-label="Turned in by">
+                <h3 className="il-modal-label">Turned In By</h3>
+                <dl className="il-claimed-fields">
+                  <dt>Name</dt>
+                  <dd>{finder.name}</dd>
+                  {finder.studentId && (
+                    <>
+                      <dt>Student Number</dt>
+                      <dd>{finder.studentId}</dd>
+                    </>
+                  )}
+                  {finder.contactNumber && (
+                    <>
+                      <dt>Contact Number</dt>
+                      <dd>
+                        <a href={`tel:${finder.contactNumber}`}>{finder.contactNumber}</a>
+                      </dd>
+                    </>
+                  )}
+                </dl>
+              </section>
+            )}
+
             {current.status === 'claimed' && (
               <section className="il-claimed-by" aria-label="Claimed by">
                 <h3 className="il-modal-label">Claimed By</h3>
                 {current.claimedBy ? (
                   <dl className="il-claimed-fields">
-                    <dt>Student Name</dt>
+                    <dt>Name</dt>
                     <dd>{current.claimedBy.studentName}</dd>
-                    <dt>Student ID / Number</dt>
-                    <dd>{current.claimedBy.studentId}</dd>
+                    {current.claimedBy.studentId && (
+                      <>
+                        <dt>Student Number</dt>
+                        <dd>{current.claimedBy.studentId}</dd>
+                      </>
+                    )}
                     <dt>Contact Number</dt>
                     <dd>
                       <a href={`tel:${current.claimedBy.contactNumber}`}>
                         {current.claimedBy.contactNumber}
                       </a>
                     </dd>
+                    {current.claimedBy.proofOfOwnership && (
+                      <>
+                        <dt className="il-wide">Proof of Ownership</dt>
+                        <dd className="il-wide">{current.claimedBy.proofOfOwnership}</dd>
+                      </>
+                    )}
                     {processedByName && (
                       <>
                         <dt>Processed By</dt>
@@ -624,12 +847,182 @@ export default function ItemListing() {
                 )}
               </section>
             )}
-            {!claiming && <FormError message={actionError} />}
-            {/* LOST -> Found Item button */}
-            {current.status === 'lost' && (
-              <button type="button" className="il-claim" onClick={handleFound} disabled={busy}>
-                {busy ? 'Saving…' : 'Found Item'}
+
+            {!claiming && !markingFound && <FormError message={actionError} />}
+
+            {/* LOST -> Found Item button, then the found form */}
+            {current.status === 'lost' && !markingFound && (
+              <button
+                type="button"
+                className="il-claim"
+                onClick={() => { setActionError(''); setMarkingFound(true) }}
+              >
+                Found Item
               </button>
+            )}
+
+            {current.status === 'lost' && markingFound && (
+              <form className="il-claim-form" onSubmit={handleFound} noValidate>
+                <h3 className="il-modal-label">Found Details</h3>
+
+                <div className="il-field">
+                  <span id="found-when-label">When found</span>
+                  <div className="il-found-when" role="group" aria-labelledby="found-when-label">
+                    <input
+                      name="day"
+                      type="date"
+                      aria-label="Date found"
+                      max={today}
+                      value={found.day}
+                      onChange={onFoundField}
+                      aria-invalid={foundInvalid.day ? 'true' : undefined}
+                      aria-describedby={foundInvalid.day ? 'found-error' : undefined}
+                      required
+                    />
+                    <input
+                      name="time"
+                      type="time"
+                      aria-label="Time found"
+                      max={found.day === today ? nowTime : undefined}
+                      value={found.time}
+                      onChange={onFoundField}
+                      aria-invalid={foundInvalid.time ? 'true' : undefined}
+                      aria-describedby={foundInvalid.time ? 'found-error' : undefined}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className={`il-field${foundInvalid.place ? ' is-invalid' : ''}`}>
+                  <span>Where found</span>
+                  <SelectMenu
+                    id="found-place"
+                    ariaLabel="Where found"
+                    value={found.place}
+                    options={PLACE_OPTIONS}
+                    placeholder="Select location"
+                    onChange={onFoundPlace}
+                    open={foundMenu === 'found-place'}
+                    setOpen={setFoundMenu}
+                  />
+                  {found.place === 'Others' && (
+                    <input
+                      name="customPlace"
+                      maxLength={80}
+                      value={found.customPlace}
+                      onChange={onFoundField}
+                      autoComplete="off"
+                      aria-label="Specific location"
+                      placeholder="Enter specific location"
+                      aria-invalid={foundInvalid.customPlace ? 'true' : undefined}
+                      aria-describedby={foundInvalid.customPlace ? 'found-error' : undefined}
+                      required
+                    />
+                  )}
+                </div>
+
+                <section className="post-section" aria-labelledby="found-finder-heading">
+                  <h3 id="found-finder-heading">Turned in by</h3>
+
+                  <label>
+                    Name
+                    <input
+                      name="finderName"
+                      maxLength={80}
+                      value={found.finderName}
+                      onChange={onFoundField}
+                      autoComplete="off"
+                      placeholder="e.g. Juan Dela Cruz"
+                      aria-invalid={foundInvalid.finderName ? 'true' : undefined}
+                      aria-describedby={foundInvalid.finderName ? 'found-error' : undefined}
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    Student number (optional)
+                    <input
+                      name="finderStudentId"
+                      value={found.finderStudentId}
+                      onChange={onFoundField}
+                      inputMode="numeric"
+                      maxLength={10}
+                      autoComplete="off"
+                      placeholder="e.g. 2020100450"
+                      aria-invalid={foundInvalid.finderStudentId ? 'true' : undefined}
+                      aria-describedby={foundInvalid.finderStudentId ? 'found-error' : undefined}
+                    />
+                  </label>
+
+                  <label>
+                    Contact number
+                    <input
+                      name="finderContact"
+                      type="tel"
+                      value={found.finderContact}
+                      onChange={onFoundField}
+                      inputMode="numeric"
+                      maxLength={11}
+                      autoComplete="off"
+                      placeholder="e.g. 09123456789"
+                      aria-invalid={foundInvalid.finderContact ? 'true' : undefined}
+                      aria-describedby={foundInvalid.finderContact ? 'found-error' : undefined}
+                      required
+                    />
+                  </label>
+                </section>
+
+                <div className={`il-field${foundInvalid.photo ? ' is-invalid' : ''}`}>
+                  <span>Photo</span>
+                  <div className={`photo-box${foundPreview ? ' has-image' : ''}`}>
+                    {foundPreview ? (
+                      <img src={foundPreview} alt="Selected item preview" className="photo-img" />
+                    ) : (
+                      <button
+                        type="button"
+                        className="photo-empty"
+                        onClick={() => foundFileInput.current?.click()}
+                      >
+                        <span className="photo-empty-title">Choose a photo</span>
+                        <span className="photo-empty-hint">JPG, PNG, or WebP, up to 5 MB</span>
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={foundFileInput}
+                    type="file"
+                    hidden
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={onFoundFile}
+                  />
+                  {foundPreview && (
+                    <div className="photo-actions">
+                      <button type="button" className="photo-link" onClick={() => foundFileInput.current?.click()}>
+                        Change
+                      </button>
+                      <button type="button" className="photo-link" onClick={removeFoundPhoto}>
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <FormError message={actionError} id="found-error" />
+
+                <div className="il-claim-actions">
+                  <button
+                    type="button"
+                    className="btn-outline"
+                    onClick={() => { resetFound(); setActionError('') }}
+                    disabled={busy}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="il-claim" disabled={busy}>
+                    {busy ? 'Saving…' : 'Mark as Found'}
+                  </button>
+                </div>
+              </form>
             )}
 
             {/* FOUND -> Claim Item button, then claiming form */}
@@ -647,7 +1040,20 @@ export default function ItemListing() {
               <form className="il-claim-form" onSubmit={handleClaim} noValidate>
                 <h3 className="il-modal-label">Claiming Form</h3>
                 <label>
-                  Student Number
+                  Name
+                  <input
+                    name="studentName"
+                    value={claim.studentName}
+                    onChange={onClaimField}
+                    autoComplete="name"
+                    placeholder="e.g. Juan Dela Cruz"
+                    aria-invalid={claimInvalid.studentName ? 'true' : undefined}
+                    aria-describedby={claimInvalid.studentName ? 'claim-error' : undefined}
+                    required
+                  />
+                </label>
+                <label>
+                  Student number (optional)
                   <input
                     name="studentId"
                     value={claim.studentId}
@@ -658,20 +1064,6 @@ export default function ItemListing() {
                     placeholder="e.g. 2020100450"
                     aria-invalid={claimInvalid.studentId ? 'true' : undefined}
                     aria-describedby={claimInvalid.studentId ? 'claim-error' : undefined}
-                    required
-                  />
-                </label>
-                <label>
-                  Student Name
-                  <input
-                    name="studentName"
-                    value={claim.studentName}
-                    onChange={onClaimField}
-                    autoComplete="name"
-                    placeholder="e.g. Juan Dela Cruz"
-                    aria-invalid={claimInvalid.studentName ? 'true' : undefined}
-                    aria-describedby={claimInvalid.studentName ? 'claim-error' : undefined}
-                    required
                   />
                 </label>
                 <label>
@@ -687,6 +1079,20 @@ export default function ItemListing() {
                     placeholder="e.g. 09123456789"
                     aria-invalid={claimInvalid.contactNumber ? 'true' : undefined}
                     aria-describedby={claimInvalid.contactNumber ? 'claim-error' : undefined}
+                    required
+                  />
+                </label>
+                <label>
+                  Proof of ownership
+                  <textarea
+                    name="proofOfOwnership"
+                    rows={3}
+                    maxLength={300}
+                    value={claim.proofOfOwnership}
+                    onChange={onClaimField}
+                    placeholder="Describe something only the owner would know, such as what is inside, marks, or scratches"
+                    aria-invalid={claimInvalid.proofOfOwnership ? 'true' : undefined}
+                    aria-describedby={claimInvalid.proofOfOwnership ? 'claim-error' : undefined}
                     required
                   />
                 </label>

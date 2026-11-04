@@ -6,8 +6,13 @@ import { uploadImage, validateImage } from '../utils/uploadImage'
 import { LOCATIONS } from '../constants/locations'
 import './styles/PostItem.css'
 import SelectMenu from '../components/SelectMenu'
+import { STUDENT_NO, PH_MOBILE, cleanStudentNo, cleanPhone } from '../utils/validators'
 
-const emptyForm = { name: '', description: '', day: '', time: '', place: '', customPlace: '' }
+const emptyForm = {
+  name: '', description: '', day: '', time: '', place: '', customPlace: '',
+  finderName: '', finderStudentId: '', finderContact: '',
+  lostByName: '', lostByStudentId: '', lostByContact: '',
+}
 const PLACE_OPTIONS = LOCATIONS.map((p) => ({ value: p, label: p }))
 
 function makeItemId() {
@@ -106,6 +111,14 @@ export default function PostItem({ onDone, onResult }) {
   const handlePlaceChange = (value) =>
     setForm((f) => ({ ...f, place: value, customPlace: '' }))
 
+  const handleFinderChange = (e) => {
+    const { name } = e.target
+    let value = e.target.value
+    if (name === 'finderStudentId' || name === 'lostByStudentId') value = cleanStudentNo(value)
+    if (name === 'finderContact' || name === 'lostByContact') value = cleanPhone(value)
+    setForm((f) => ({ ...f, [name]: value }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -123,6 +136,44 @@ export default function PostItem({ onDone, onResult }) {
     if (form.place === 'Others' && !form.customPlace.trim()) {
       setError('Enter the specific location.')
       return
+    }
+
+    if (isFound) {
+      if (!form.finderName.trim()) {
+        setError('Enter the name of the person who turned in the item.')
+        return
+      }
+      if (form.finderStudentId && !STUDENT_NO.test(form.finderStudentId)) {
+        setError('The student number must be 10 digits (e.g. 2020100450).')
+        return
+      }
+      if (!form.finderContact) {
+        setError('Enter the contact number of the person who turned in the item.')
+        return
+      }
+      if (!PH_MOBILE.test(form.finderContact)) {
+        setError('The contact number must be 11 digits starting with 09 (e.g. 09123456789).')
+        return
+      }
+    }
+
+    if (!isFound) {
+      if (!form.lostByName.trim()) {
+        setError('Enter the name of the person who lost the item.')
+        return
+      }
+      if (form.lostByStudentId && !STUDENT_NO.test(form.lostByStudentId)) {
+        setError('The student number must be 10 digits (e.g. 2020100450), or leave it blank.')
+        return
+      }
+      if (!form.lostByContact) {
+        setError('Enter the contact number of the person who lost the item.')
+        return
+      }
+      if (!PH_MOBILE.test(form.lostByContact)) {
+        setError('The contact number must be 11 digits starting with 09 (e.g. 09123456789).')
+        return
+      }
     }
 
     setSaving(true)
@@ -153,6 +204,24 @@ export default function PostItem({ onDone, onResult }) {
           date: `${form.day}T${form.time}`,
           place: form.place === 'Others' ? form.customPlace.trim() : form.place,
           placeCategory: form.place,
+          ...(isFound
+            ? {
+                turnedInBy: {
+                  name: form.finderName.trim(),
+                  contactNumber: form.finderContact,
+                  ...(form.finderStudentId ? { studentId: form.finderStudentId } : {}),
+                },
+              }
+            : {}),
+          ...(!isFound
+            ? {
+                lostBy: {
+                  name: form.lostByName.trim(),
+                  contactNumber: form.lostByContact,
+                  ...(form.lostByStudentId ? { studentId: form.lostByStudentId } : {}),
+                },
+              }
+            : {}),
           imageUrl,
           postedBy: user.uid,
           createdAt: serverTimestamp(),
@@ -258,7 +327,76 @@ export default function PostItem({ onDone, onResult }) {
           />
         )}
       </div>
+      {isFound && (
+        <section className="post-section" aria-labelledby="finder-heading">
+          <h3 id="finder-heading">Turned in by</h3>
 
+          <div className="post-field">
+            <label htmlFor="finder-name">Name <span className="required">*</span></label>
+            <input
+              id="finder-name" name="finderName" maxLength={80}
+              value={form.finderName} onChange={handleChange}
+              autoComplete="off" required
+              placeholder="e.g. Juan Dela Cruz"
+            />
+          </div>
+
+          <div className="post-field">
+            <label htmlFor="finder-student">Student number (optional)</label>
+            <input
+              id="finder-student" name="finderStudentId"
+              value={form.finderStudentId} onChange={handleFinderChange}
+              inputMode="numeric" maxLength={10} autoComplete="off"
+              placeholder="e.g. 2020100450"
+            />
+          </div>
+
+          <div className="post-field">
+            <label htmlFor="finder-contact">Contact number <span className="required">*</span></label>
+            <input
+              id="finder-contact" name="finderContact" type="tel"
+              value={form.finderContact} onChange={handleFinderChange}
+              inputMode="numeric" maxLength={11} autoComplete="off" required
+              placeholder="e.g. 09123456789"
+            />
+          </div>
+        </section>
+      )}
+      {!isFound && (
+        <section className="post-section" aria-labelledby="lostby-heading">
+          <h3 id="lostby-heading">Lost by</h3>
+
+          <div className="post-field">
+            <label htmlFor="lostby-name">Name <span className="required">*</span></label>
+            <input
+              id="lostby-name" name="lostByName" maxLength={80}
+              value={form.lostByName} onChange={handleChange}
+              autoComplete="off" required
+              placeholder="e.g. Juan Dela Cruz"
+            />
+          </div>
+
+          <div className="post-field">
+            <label htmlFor="lostby-student">Student number (optional)</label>
+            <input
+              id="lostby-student" name="lostByStudentId"
+              value={form.lostByStudentId} onChange={handleFinderChange}
+              inputMode="numeric" maxLength={10} autoComplete="off"
+              placeholder="e.g. 2020100450"
+            />
+          </div>
+
+          <div className="post-field">
+            <label htmlFor="lostby-contact">Contact number <span className="required">*</span></label>
+            <input
+              id="lostby-contact" name="lostByContact" type="tel"
+              value={form.lostByContact} onChange={handleFinderChange}
+              inputMode="numeric" maxLength={11} autoComplete="off" required
+              placeholder="e.g. 09123456789"
+            />
+          </div>
+        </section>
+      )}
       <div className="post-field">
         <span className="post-label">Photo{isFound ? <span className='required'> *</span> : ' (optional)'}</span>
 

@@ -171,8 +171,8 @@ export default function Browse() {
         <div className="bw-banner-inner">
           <InfoIcon />
           <span>
-            To claim an item, or for any concerns about a lost or found item,
-            please go to the Local Student Council.
+            To claim an item or for any concerns about a lost or found item,
+            please go to the CICT Local Student Council.
           </span>
         </div>
       </div>

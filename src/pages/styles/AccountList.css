@@ -33,6 +33,11 @@
   font-size: 0.85rem;
   color: var(--muted);
 }
+
+.al-field .il-dropdown {
+  width: 100%;
+  font-size: 1rem;
+}
 .il-claim-form .al-field .il-dropdown .il-dropdown-btn {
   width: 100%;
   min-height: 2.75rem;

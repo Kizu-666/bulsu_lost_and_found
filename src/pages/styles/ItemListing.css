@@ -1244,3 +1244,121 @@
     transition: none;
   }
 }
+
+/* ---------- found form (lost -> found) ---------- */
+.il-claim-form .il-field {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.il-found-when {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 0.6rem;
+}
+
+.il-found-when input { min-width: 0; }
+
+@media (max-width: 380px) {
+  .il-found-when { grid-template-columns: 1fr; }
+}
+
+.il-claim-form .il-field .il-dropdown {
+  width: 100%;
+  font-size: 1rem; /* the field wrapper is 0.85rem, which made the menu text smaller */
+}
+
+.il-claim-form .il-field .il-dropdown-btn {
+  width: 100%;
+  min-height: 2.75rem;
+  text-align: left;
+  border: 1.5px solid rgba(43, 33, 24, 0.35);
+}
+
+.il-claim-form .il-field .il-dropdown-btn.is-placeholder {
+  color: rgba(43, 33, 24, 0.62);
+}
+
+.il-claim-form .il-field .il-dropdown-select .il-dropdown-panel {
+  width: 100%;
+  max-width: none;
+}
+
+/* red border for the menu and the photo box when they have an error */
+.il-claim-form .il-field.is-invalid .il-dropdown-btn,
+.il-claim-form .il-field.is-invalid .photo-box {
+  border-color: #b3261e;
+}
+
+/* "Turned in by" box in the details popup (blue, like the Found status) */
+.il-claimed-by.il-finder-by {
+  border-left-color: var(--status-found);
+  background: rgba(158, 177, 246, 0.15);
+  margin-bottom: 0.75rem;
+}
+
+/* "Turned in by" section inside the found form */
+.il-claim-form .post-section {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.il-claim-form .post-section h3 {
+  margin: 0;
+}
+
+/* Proof of ownership (textarea in the claim form) */
+.il-claim-form textarea {
+  font: inherit;
+  font-size: 1rem;
+  padding: 0.65rem 0.8rem;
+  min-height: 5rem;
+  color: var(--text);
+  border: 1.5px solid rgba(43, 33, 24, 0.35);
+  border-radius: 10px;
+  background: var(--white);
+  resize: vertical;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.il-claim-form textarea:hover {
+  border-color: var(--primary);
+}
+
+.il-claim-form textarea:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
+}
+
+.il-claim-form textarea[aria-invalid="true"] {
+  border-color: #b3261e;
+  box-shadow: 0 0 0 0.5px #b3261e;
+}
+
+.il-claim-form textarea[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 0.5px #b3261e;
+}
+
+/* long text in the "Claimed By" box takes the full width and keeps line breaks */
+.il-claimed-fields .il-wide {
+  grid-column: 1 / -1;
+}
+
+.il-claimed-fields dd.il-wide {
+  white-space: pre-wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .il-claim-form textarea { transition: none; }
+}
+
+/* "Lost by" box in the details popup (red, like the Lost status) */
+.il-claimed-by.il-lost-by {
+  border-left-color: var(--status-lost);
+  background: rgba(247, 155, 155, 0.15);
+  margin-bottom: 0.75rem;
+}

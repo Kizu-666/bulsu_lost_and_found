@@ -33,7 +33,7 @@ export default function Landing() {
               </h1>
               <p className="hero-text">
                 Browse the items turned in to the CICT Lost and Found. Spot yours,
-                then claim it at the LSC office with your student ID.
+                then claim it at the LSC office with your details.
               </p>
               <div className="hero-actions">
                 <Link to="/browse" className="hero-btn">Browse items</Link>
@@ -92,7 +92,7 @@ export default function Landing() {
                   </svg>
                 </span>
                 <h3>Visit the CICT LSC</h3>
-                <p>Bring your student ID to the LSC office and give the officer the item&rsquo;s ID number.</p>
+                <p>Bring a valid ID to the LSC office and give the officer the item&rsquo;s ID number.</p>
               </li>
               <li>
                 <span className="claim-num">3</span>
@@ -103,7 +103,7 @@ export default function Landing() {
                   </svg>
                 </span>
                 <h3>Sign and take it home</h3>
-                <p>The officer records your student number and hands the item over.</p>
+                <p>The officer records your details and hands the item over.</p>
               </li>
             </ol>
           </div>
